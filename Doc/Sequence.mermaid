@@ -1,0 +1,41 @@
+sequenceDiagram
+    actor User
+    participant Frontend as Frontend (React)
+    participant Backend as Backend (Django)
+    participant DB as Haupt-DB
+    participant VectorDB as Vector DB
+    participant EmbedGen as Embedding Generator
+    box Externe Systeme (nur für Film-Anlage)
+        participant TMDB as TMDB API
+    end
+
+    User->>Frontend: Navigiert zu "Find me a Film like"
+    User->>Frontend: Gibt Filmtitel ein
+    Frontend->>Backend: Sendet Suche nach Titel
+    Backend->>DB: Query: Finde Film mit Titel
+    DB-->>Backend: Film-Datensatz (existiert)
+    Backend->>Frontend: Film-Vorschlag
+
+    User->>Frontend: Klickt auf Film
+    Frontend->>Backend: Anfrage ähnliche Filme (Film-ID)
+
+    rect rgba(100,200,100,0.1)
+        note right of Frontend: Optionaler Filter
+        User->>Frontend: Aktiviert Filter (z.B. Genre/Jahr)
+        Frontend->>Backend: Sendet Filterparameter + Film-ID
+    end
+
+    Backend->>VectorDB: Nearest Neighbors Query mit Film-ID
+    VectorDB-->>Backend: Liste ähnlicher Film-IDs
+
+    alt Filter aktiv
+        Backend->>DB: Filtere Filme mit IDs + Filterkriterien
+    else Kein Filter
+        Backend->>DB: Hole Filmdaten für IDs
+    end
+
+    DB-->>Backend: Gefilterte Filmdaten
+    Backend->>Frontend: Liste ähnlicher Filme
+    Frontend->>User: Zeigt Ergebnisse an
+
+    note over TMDB, EmbedGen: Wird nur für neue Filme verwendet<br/>nicht in diesem Use Case
