@@ -15,7 +15,7 @@ flowchart TD
     D --> E[Sortierte Filmliste anzeigen]
     E --> F[Nutzer klickt auf Film-Detail]
     F --> G[Details anzeigen]
-````
+```
 
 ---
 

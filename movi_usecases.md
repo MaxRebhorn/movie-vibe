@@ -9,7 +9,7 @@
 **Ablauf**:
 1. Der Nutzer öffnet die Startseite.
 2. Der Nutzer gibt eine Stimmung ein (z. B. „melancholisch, ruhig, minimalistisch“).
-3. Das System wandelt die Eingabe mithilfe eines NLP-Modells in einen Vektor um.
+3. Das System wandelt die Eingabe mithilfe eines NLP-Modells (Natural Language Processing) in einen Vektor um.
 4. Das System vergleicht diesen Vektor mit allen vorhandenen Film-Vektoren (via Vektor-Datenbank).
 5. Das System sortiert die Ergebnisse nach Ähnlichkeit.
 6. Eine Liste ähnlicher Filme wird angezeigt.
