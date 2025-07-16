@@ -3,7 +3,7 @@ stages:
   - deploy  # optional
 
 variables:
-  DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/test_db"
+  DATABASE_URL: "postgresql://postgres:postgres@db:5432/test_db"
   PYTHON_VERSION: "3.9"  # Use your Python version
 
 services:
