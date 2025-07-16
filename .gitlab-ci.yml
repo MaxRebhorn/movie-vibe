@@ -1,4 +1,4 @@
-image: docker:20.10.24  # Use a newer Docker version that includes 'docker compose'
+image: docker:20.10.24
 
 variables:
   POSTGRES_DB: "test_db"
@@ -8,7 +8,7 @@ variables:
   PYTHON_VERSION: "3.9"
 
 services:
-  - docker:20.10.24-dind  # Match client version
+  - docker:20.10.24-dind
 
 stages:
   - build
@@ -16,12 +16,15 @@ stages:
 
 before_script:
   - docker info
-  - docker compose version  # Verify new command format
+  - docker compose version
 
 build:
   stage: build
   script:
-    - docker compose build  # Use 'docker compose' without hyphen
+    # Ensure entrypoint.sh exists and has execute permissions
+    - test -f docker/entrypoint.sh || echo "#!/bin/sh" > docker/entrypoint.sh
+    - chmod +x docker/entrypoint.sh
+    - docker compose build
 
 test:
   stage: test
