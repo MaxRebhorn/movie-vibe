@@ -1,2 +1,6 @@
 /venv/
 venv/
+
+# Block prohibited file types
+*.pem
+*.key
