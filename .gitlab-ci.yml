@@ -1,31 +1,33 @@
-image: docker:latest
+variables:
+  POSTGRES_DB: "test_db"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  POSTGRES_HOST: "db"
+  PYTHON_VERSION: "3.9"
 
 services:
-  - docker:dind
-
-variables:
-  POSTGRES_DB: django_db
-  POSTGRES_USER: django_user
-  POSTGRES_PASSWORD: django_password
-  POSTGRES_HOST: db
-  DEBUG: '1'
-  DOCKER_DRIVER: overlay2
-
-before_script:
-  - apk update
-  - apk add docker-compose
-  - apk add postgresql-client
+  - docker:19.03.12-dind
 
 stages:
+  - build
   - test
+
+before_script:
+  - docker info
+  - docker-compose --version
+
+build:
+  stage: build
+  script:
+    - docker-compose -f docker-compose.yml build
 
 test:
   stage: test
   script:
-    - docker-compose up -d
-    - echo "Waiting for PostgreSQL to be ready..."
-    - timeout 120s bash -c 'until pg_isready -h db -U $POSTGRES_USER; do sleep 2; done'
-    - docker-compose exec web python manage.py migrate
+    - docker-compose -f docker-compose.yml up -d  # Start up services
+    - timeout 60s bash -c 'until docker-compose exec db pg_isready -h db -p 5432; do sleep 2 ; done'
+    - docker-compose exec web pip install -U pip
+    - docker-compose exec web pip install -r requirements.txt
     - docker-compose exec web python manage.py test --noinput
   after_script:
-    - docker-compose down -v
+    - docker-compose down  # Clean up
