@@ -14,20 +14,20 @@ stages:
 
 before_script:
   - docker info
-  - docker-compose --version
+  - docker compose --version
 
 build:
   stage: build
   script:
-    - docker-compose -f docker-compose.yml build
+    - docker compose -f docker-compose.yml build
 
 test:
   stage: test
   script:
-    - docker-compose -f docker-compose.yml up -d  # Start up services
-    - timeout 60s bash -c 'until docker-compose exec db pg_isready -h db -p 5432; do sleep 2 ; done'
-    - docker-compose exec web pip install -U pip
-    - docker-compose exec web pip install -r requirements.txt
-    - docker-compose exec web python manage.py test --noinput
+    - docker compose -f docker-compose.yml up -d  # Start up services
+    - timeout 60s bash -c 'until docker compose exec db pg_isready -h db -p 5432; do sleep 2 ; done'
+    - docker compose exec web pip install -U pip
+    - docker compose exec web pip install -r requirements.txt
+    - docker compose exec web python manage.py test --noinput
   after_script:
-    - docker-compose down  # Clean up
+    - docker compose down  # Clean up
