@@ -1,0 +1,25 @@
+stages:
+  - test
+  - deploy  # optional
+
+variables:
+  DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/test_db"
+  PYTHON_VERSION: "3.9"  # Use your Python version
+
+services:
+  - postgres:latest
+
+test:
+  stage: test
+  image: python:$PYTHON_VERSION
+  before_script:
+    - apt-get update -qy
+    - apt-get install -y python3-dev libpq-dev
+    - pip install -U pip
+    - pip install -r requirements.txt
+  script:
+    - python manage.py test --noinput
+  only:
+    - merge_requests
+    - master
+    - main
