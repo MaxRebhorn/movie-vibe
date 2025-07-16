@@ -1,0 +1,8 @@
+/venv/
+venv/
+
+# Block prohibited file types
+*.pem
+*.key
+django_backend/ __pycache__
+
