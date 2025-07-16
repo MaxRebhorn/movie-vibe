@@ -1,6 +1,6 @@
 /venv/
 venv/
-
+.idea
 # Block prohibited file types
 *.pem
 *.key
