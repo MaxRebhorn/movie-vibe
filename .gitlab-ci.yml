@@ -1,9 +1,10 @@
 variables:
-  POSTGRES_DB: "test_db"  # Default value if not set in CI variables
+  POSTGRES_DB: "test_db"
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "postgres"
   POSTGRES_HOST: "postgres"
   DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}"
+  PYTHON_VERSION: "3.9"  # Change to the specific version you need
 
 services:
   - name: postgres:latest
@@ -12,10 +13,11 @@ services:
       POSTGRES_DB: "${POSTGRES_DB}"
       POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      # Ensure no invalid characters are passed
 
 test:
   stage: test
-  image: python:$PYTHON_VERSION
+  image: python:${PYTHON_VERSION}
   before_script:
     - apt-get update -qy
     - apt-get install -y python3-dev libpq-dev postgresql-client
