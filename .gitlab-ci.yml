@@ -19,12 +19,12 @@ before_script:
 build:
   stage: build
   script:
-    - docker compose -f docker-compose.yml build
+    - docker compose --file docker-compose.yml build
 
 test:
   stage: test
   script:
-    - docker compose -f docker-compose.yml up -d  # Start up services
+    - docker compose --file docker-compose.yml up -d  # Start up services
     - timeout 60s bash -c 'until docker compose exec db pg_isready -h db -p 5432; do sleep 2 ; done'
     - docker compose exec web pip install -U pip
     - docker compose exec web pip install -r requirements.txt
