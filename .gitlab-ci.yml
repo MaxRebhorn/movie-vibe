@@ -1,3 +1,5 @@
+image: docker:20.10.24  # Use a newer Docker version that includes 'docker compose'
+
 variables:
   POSTGRES_DB: "test_db"
   POSTGRES_USER: "postgres"
@@ -6,7 +8,7 @@ variables:
   PYTHON_VERSION: "3.9"
 
 services:
-  - docker:19.03.12-dind
+  - docker:20.10.24-dind  # Match client version
 
 stages:
   - build
@@ -14,22 +16,20 @@ stages:
 
 before_script:
   - docker info
-  - docker-compose --version  # Check hyphenated version
-  - apk add --no-cache py3-pip  # Install dependencies for docker-compose
-  - pip3 install docker-compose  # Install docker-compose
+  - docker compose version  # Verify new command format
 
 build:
   stage: build
   script:
-    - docker-compose --file docker-compose.yml build  # Use hyphenated command
+    - docker compose build  # Use 'docker compose' without hyphen
 
 test:
   stage: test
   script:
-    - docker-compose --file docker-compose.yml up -d  # Use hyphenated
-    - timeout 60s bash -c 'until docker-compose exec db pg_isready -h db -p 5432; do sleep 2 ; done'
-    - docker-compose exec web pip install -U pip
-    - docker-compose exec web pip install -r requirements.txt
-    - docker-compose exec web python manage.py test --noinput
+    - docker compose up -d
+    - timeout 60s bash -c 'until docker compose exec db pg_isready -h db -p 5432; do sleep 2 ; done'
+    - docker compose exec web pip install -U pip
+    - docker compose exec web pip install -r requirements.txt
+    - docker compose exec web python manage.py test --noinput
   after_script:
-    - docker-compose down  # Use hyphenated
+    - docker compose down
