@@ -1,3 +1,7 @@
+
+
+
+```mermaid
 sequenceDiagram
     actor User
     participant Frontend as Frontend (React)
@@ -9,7 +13,7 @@ sequenceDiagram
         participant TMDB as TMDB API
     end
 
-    User->>Frontend: Navigiert zu "Find me a Film like"
+    User->>Frontend: Navigiert zu Filmsuche
     User->>Frontend: Gibt Filmtitel ein
     Frontend->>Backend: Sendet Suche nach Titel
     Backend->>DB: Query: Finde Film mit Titel
@@ -39,3 +43,8 @@ sequenceDiagram
     Frontend->>User: Zeigt Ergebnisse an
 
     note over TMDB, EmbedGen: Wird nur für neue Filme verwendet<br/>nicht in diesem Use Case
+```
+
+
+
+
