@@ -6,3 +6,4 @@ venv/
 *.key
 django_backend/ __pycache__
 
+/.env
