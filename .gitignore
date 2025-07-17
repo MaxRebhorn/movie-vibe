@@ -1,8 +1,9 @@
 /venv/
 venv/
-
+.idea
 # Block prohibited file types
 *.pem
 *.key
-django_backend/ __pycache__
+django_backend/__pycache__/
 
+/.env

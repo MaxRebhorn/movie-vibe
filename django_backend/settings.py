@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    # 'movies',  # Uncomment wenn du die movies App erstellst
+    'movies'
 ]
 
 MIDDLEWARE = [

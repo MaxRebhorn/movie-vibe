@@ -1,0 +1,38 @@
+image: docker:20.10.24
+
+variables:
+  POSTGRES_DB: "test_db"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  POSTGRES_HOST: "db"
+  PYTHON_VERSION: "3.9"
+
+services:
+  - docker:20.10.24-dind
+
+stages:
+  - build
+  - test
+
+before_script:
+  - docker info
+  - docker compose version
+
+build:
+  stage: build
+  script:
+    # Ensure entrypoint.sh exists and has execute permissions
+    - test -f docker/entrypoint.sh || echo "#!/bin/sh" > docker/entrypoint.sh
+    - chmod +x docker/entrypoint.sh
+    - docker compose build
+
+test:
+  stage: test
+  script:
+    - docker compose up -d
+    - timeout 60s sh -c 'until docker compose exec db pg_isready -h db -p 5432; do sleep 2 ; done'
+    - docker compose exec web pip install -U pip
+    - docker compose exec web pip install -r requirements.txt
+    - docker compose exec web python manage.py test --noinput
+  after_script:
+    - docker compose down
