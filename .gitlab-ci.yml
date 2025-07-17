@@ -30,7 +30,7 @@ test:
   stage: test
   script:
     - docker compose up -d
-    - timeout 60s bash -c 'until docker compose exec db pg_isready -h db -p 5432; do sleep 2 ; done'
+    - timeout 60s sh -c 'until docker compose exec db pg_isready -h db -p 5432; do sleep 2 ; done'
     - docker compose exec web pip install -U pip
     - docker compose exec web pip install -r requirements.txt
     - docker compose exec web python manage.py test --noinput
