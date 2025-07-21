@@ -1,29 +1,29 @@
-# Dockerfile für Django
 FROM python:3.11-slim
 
-# Arbeitsverzeichnis setzen
 WORKDIR /app
 
-# System-Dependencies installieren
+# System-Dependencies für rapidfuzz, psycopg2 und netcat
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
-    netcat-traditional \
+    curl \
+    gcc \
+    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
-# Python Dependencies
-COPY ../requirements.txt .
+# Installiere Python-Abhängigkeiten
+COPY requirements.txt .
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Projekt kopieren
-COPY .. .
+# Restliches Projekt kopieren
+COPY . .
 
-# Port freigeben
-EXPOSE 8000
-
-# Entrypoint Script
-COPY ../entrypoint.sh /entrypoint.sh
+# Einstiegspunkt setzen
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+EXPOSE 8000
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
