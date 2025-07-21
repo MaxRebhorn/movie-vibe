@@ -10,6 +10,13 @@ from datetime import date, timedelta
 import json
 
 from movies.serializers import MovieSerializer
+from django_elasticsearch_dsl.registries import registry
+from rest_framework import status
+from rest_framework.test import APIClient
+
+from movies.models import Movie
+from movies.document import MovieDocument
+from datetime import date
 
 
 # Create your tests here.
@@ -148,7 +155,6 @@ class MovieTestCase(TestCase):
         """Test that Meta options are correctly set"""
         self.assertEqual(Movie._meta.db_table, "Movie")
         self.assertEqual(Movie._meta.ordering, ['-release_date'])
-
 
 
 class MovieSerializerTestCase(TestCase):
@@ -399,3 +405,139 @@ class MovieViewTestCase(APITestCase):
         invalid_url = reverse('movie_detail', kwargs={'id': 9999})
         response = self.client.get(invalid_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class MovieSearchViewTests(TestCase):
+    client_class = APIClient
+
+    def setUp(self):
+        # Clear Elasticsearch index
+        registry.delete_models([MovieDocument])
+
+        # Create test movies
+        self.movie1 = Movie.objects.create(
+            title="The Matrix",
+            original_title="The Matrix",
+            synopsis="A computer hacker learns about the true nature of reality",
+            tagline="Welcome to the Real World",
+            language="English",
+            country="US",
+            release_date=date(1999, 3, 31),
+            runtime=136,
+            director="Lana Wachowski",
+            cast=["Keanu Reeves", "Laurence Fishburne"],
+            genres=["Action", "Sci-Fi"],
+            keywords=["simulation", "artificial intelligence"],
+            composer=["Don Davis"],
+            poster_url="https://example.com/matrix.jpg",
+            backdrop_url="https://example.com/matrix-bg.jpg",
+            avg_rating=8.7,
+            tmdb_id=603
+        )
+        self.movie2 = Movie.objects.create(
+            title="Inception",
+            original_title="Inception",
+            synopsis="A thief steals secrets using dream-sharing technology",
+            tagline="Your mind is the scene of the crime",
+            language="English",
+            country="US",
+            release_date=date(2010, 7, 16),
+            runtime=148,
+            director="Christopher Nolan",
+            cast=["Leonardo DiCaprio", "Joseph Gordon-Levitt"],
+            genres=["Action", "Sci-Fi", "Thriller"],
+            keywords=["dream", "subconscious"],
+            composer=["Hans Zimmer"],
+            poster_url="https://example.com/inception.jpg",
+            backdrop_url="https://example.com/inception-bg.jpg",
+            avg_rating=8.8,
+            tmdb_id=27205
+        )
+        # Refresh index to make documents searchable
+        MovieDocument._index.refresh()
+
+    def test_search_by_title(self):
+        """Test searching by movie title"""
+        response = self.client.get('/api/movies/search/', {'q': 'Matrix'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], "The Matrix")
+
+    def test_search_by_director(self):
+        """Test searching by director name"""
+        response = self.client.get('/api/movies/search/', {'q': 'Nolan'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], "Inception")
+
+    def test_search_by_genre(self):
+        """Test searching by movie genre"""
+        response = self.client.get('/api/movies/search/', {'q': 'Thriller'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], "Inception")
+
+    def test_search_by_keyword(self):
+        """Test searching by plot keyword"""
+        response = self.client.get('/api/movies/search/', {'q': 'dream'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], "Inception")
+
+    def test_search_by_cast_member(self):
+        """Test searching by cast member name"""
+        response = self.client.get('/api/movies/search/', {'q': 'Keanu'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], "The Matrix")
+
+    def test_search_multiple_results(self):
+        """Test search returning multiple results"""
+        response = self.client.get('/api/movies/search/', {'q': 'Action'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        titles = {movie['title'] for movie in response.data}
+        self.assertEqual(titles, {"The Matrix", "Inception"})
+
+    def test_empty_search_query(self):
+        """Test empty search query returns no results"""
+        response = self.client.get('/api/movies/search/', {'q': ''})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_partial_title_match(self):
+        """Test partial title matching"""
+        response = self.client.get('/api/movies/search/', {'q': 'Incep'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['title'], "Inception")
+
+    def test_field_priority(self):
+        """Test title matches have priority over other fields"""
+        # Create movie where keyword matches another movie's title
+        Movie.objects.create(
+            title="Dream Movie",
+            original_title="Dream Movie",
+            synopsis="A movie about dreams",
+            tagline="Just a dream",
+            language="English",
+            country="US",
+            release_date=date(2023, 1, 1),
+            runtime=120,
+            director="Test Director",
+            cast=["Test Actor"],
+            genres=["Drama"],
+            keywords=["inception"],
+            composer=["Test Composer"],
+            poster_url="https://example.com/test.jpg",
+            backdrop_url="https://example.com/test-bg.jpg",
+            avg_rating=7.0,
+            tmdb_id=99999
+        )
+        MovieDocument._index.refresh()
+
+        # Search should prioritize title matches over keyword matches
+        response = self.client.get('/api/movies/search/', {'q': 'inception'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['title'], "Inception")  # Title match first
+        self.assertEqual(response.data[1]['title'], "Dream Movie")  # Keyword match second
