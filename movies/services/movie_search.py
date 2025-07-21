@@ -4,30 +4,38 @@ from ..document import MovieDocument
 
 class MovieSearchService:
     @staticmethod
-    def fuzzy_search(query, fuzziness="AUTO"):
-        """Führt eine Fuzzy-Suche durch"""
+    def search(query):
+        """Basic search across name and description"""
         return MovieDocument.search().query(
-            "match",
-            title={
-                "query": query,
-                "fuzziness": fuzziness
-            }
-        )
-
-    @staticmethod
-    def suggest(query):
-        """Gibt Vorschläge für unvollständige Queries"""
-        return MovieDocument.search().suggest(
-            "suggestions",
-            query,
-            completion={"field": "title_suggest"}
-        )
-
-    @staticmethod
-    def multi_match(query, fields=["title^3", "description"]):
-        """Such in mehreren Feldern mit Gewichtung"""
-        return MovieDocument.search().query(
-            "multi_match",
+            'multi_match',
             query=query,
-            fields=fields
+            fields=[
+                'title^4',
+                'original_title^3',
+                'title_autocomplete^5',
+                'cast',
+                'director',
+                'synopsis',
+                'tagline',
+                'genres',
+                'keywords',
+                'composer',
+                'country'
+            ]
+        )
+
+    @staticmethod
+    def autocomplete(query):
+        """Instant search suggestions"""
+        return MovieDocument.search().suggest(
+            'suggestions',
+            query,
+            completion={'field': 'title_autocomplete'}
+        )
+
+    @staticmethod
+    def filter_ingredients(ingredients):
+        """Find cakes containing specific ingredients"""
+        return MovieDocument.search().filter(
+            'actors', ingredients=ingredients
         )

@@ -4,7 +4,7 @@ from rest_framework import status
 from .models import Movie
 from .serializers import MovieSerializer
 from django.shortcuts import get_object_or_404
-from movies.services.movie_search import search_for_movie
+from .services.movie_search import MovieSearchService  # Fixed import
 class MovieListCreateView(APIView):
     def get(self, request):
         movies = Movie.objects.all()
@@ -24,8 +24,31 @@ class MovieDetailView(APIView):
         serializer = MovieSerializer(movie)
         return Response(serializer.data)
 
+
 class MovieSearch(APIView):
-    def get(self, request, query):
-        movies = search_for_movie(query)
-        serializer = MovieSerializer(movies, many=True)
+    def get(self, request):
+        query = request.GET.get('q', '').strip()
+        if not query:
+            return Response([])
+
+        # Suche in Elasticsearch
+        search = MovieSearchService.search(query)
+        response = search.execute()
+
+        # IDs der Treffer extrahieren (nutzt meta.id)
+        movie_ids = [hit.meta.id for hit in response]
+
+        # Hole entsprechende Movies aus der DB
+        movies = Movie.objects.filter(id__in=movie_ids)
+
+        # Optional: Reihenfolge der ES-Treffer beibehalten
+        movie_dict = {str(movie.id): movie for movie in movies}
+        sorted_movies = [
+            movie_dict.get(str(hit.meta.id))
+            for hit in response
+            if str(hit.meta.id) in movie_dict
+        ]
+
+        # Serialisieren
+        serializer = MovieSerializer(sorted_movies, many=True)
         return Response(serializer.data)

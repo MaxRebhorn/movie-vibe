@@ -22,4 +22,5 @@ from . import views
 urlpatterns = [
     path('movies/', views.MovieListCreateView.as_view(), name='movie_list_create'),
     path('movies/<int:id>/', views.MovieDetailView.as_view(), name='movie_detail'),
+    path('movies/search/', views.MovieSearch.as_view(), name='movie_search')
 ]
