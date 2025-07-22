@@ -21,29 +21,30 @@ before_script:
 build:
   stage: build
   script:
-    - docker compose build
+    - docker compose build  # Korrigiert
 
 test:
   stage: test
   script:
     - docker compose up -d
-    - docker compose up -d
-      # Warte auf Datenbank UND Elasticsearch
-      - timeout 60s sh -c 'until docker compose exec db pg_isready -h db -p 5432; do sleep 2; done'
-      - timeout 60s sh -c 'until curl -f -s http://elasticsearch:9200; do sleep 2; done'  # Neu
-      - timeout 30s sh -c 'until nc -z web 8000; do sleep 1; done'  # Neu
-    # Install dependencies
+
+    # Warte auf alle Dienste
+    - timeout 60s sh -c 'until docker compose exec db pg_isready -h db -p 5432; do sleep 2; done'
+    - timeout 60s sh -c 'until curl -f -s http://elasticsearch:9200; do sleep 2; done'
+    - timeout 30s sh -c 'until nc -z web 8000; do sleep 1; done'
+
+    # Installiere Abhängigkeiten
     - docker compose exec web pip install -U pip
     - docker compose exec web pip install -r requirements.txt
     - docker compose exec web pip install coverage
 
-    # Run coverage and fail if coverage is too low
+    # Führe Tests aus
     - docker compose exec web coverage run manage.py test --noinput
     - docker compose exec web coverage report --fail-under=80
     - docker compose exec web coverage html
     - docker compose exec web coverage xml
 
-    # Optional: Kopiere Reports für manuelles Downloaden aus dem Web-Container (nicht zwingend)
+    # Kopiere Reports
     - docker cp $(docker compose ps -q web):/app/htmlcov ./htmlcov
     - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
 
