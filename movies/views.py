@@ -4,7 +4,10 @@ from rest_framework import status
 from .models import Movie
 from .serializers import MovieSerializer
 from django.shortcuts import get_object_or_404
-from .services.movie_search import MovieSearchService  # Fixed import
+
+from .services.movie_search import MovieSearchService
+
+
 class MovieListCreateView(APIView):
     def get(self, request):
         movies = Movie.objects.all()
