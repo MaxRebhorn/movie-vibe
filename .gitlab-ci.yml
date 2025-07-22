@@ -5,7 +5,7 @@ variables:
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "postgres"
   PYTHON_VERSION: "3.11"
-  ELASTICSEARCH_HOST: "http://elasticsearch:9200"
+  ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
 
 services:
   - docker:20.10.24-dind

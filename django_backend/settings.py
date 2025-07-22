@@ -136,6 +136,6 @@ LOGGING = {
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': os.getenv('ELASTICSEARCH_HOST', 'http://elasticsearch:9200')
+        'hosts': os.getenv('ELASTICSEARCH_DSL_HOSTS', 'http://elasticsearch:9200'),
     },
 }
