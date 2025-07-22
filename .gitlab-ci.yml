@@ -30,7 +30,7 @@ test:
 
     # Warte auf alle Dienste
     - timeout 60s sh -c 'until docker compose exec db pg_isready -h db -p 5432; do sleep 2; done'
-    - timeout 60s sh -c 'until curl -f -s http://elasticsearch:9200; do sleep 2; done'
+    - timeout 60s sh -c 'until docker compose exec web curl -f -s http://elasticsearch:9200; do sleep 2; done'
     - timeout 30s sh -c 'until nc -z web 8000; do sleep 1; done'
 
     # Installiere Abhängigkeiten
