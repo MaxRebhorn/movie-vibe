@@ -32,10 +32,10 @@ class MovieTestCase(TestCase):
             release_date=date(2010, 7, 16),
             runtime=148,
             director="Christopher Nolan",
-            cast=["Leonardo DiCaprio", "Joseph Gordon-Levitt"],  # Fixed: Use list instead of JSON string
-            genres=["Action", "Sci-Fi"],  # Fixed: Use list instead of JSON string
-            keywords=["dream", "subconscious"],  # Fixed: Use list instead of JSON string
-            composer=["Hans Zimmer"],  # Fixed: Use list instead of JSON string
+            cast=["Leonardo DiCaprio", "Joseph Gordon-Levitt"],
+            genres=["Action", "Sci-Fi"],
+            keywords=["dream", "subconscious"],
+            composer=["Hans Zimmer"],
             poster_url="https://example.com/poster.jpg",
             backdrop_url="https://example.com/backdrop.jpg",
             trailer_url="https://example.com/trailer.mp4",

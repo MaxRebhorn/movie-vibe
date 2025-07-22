@@ -27,7 +27,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'django_elasticsearch_dsl',
-    'movies'
+    'movies',
+
 ]
 
 MIDDLEWARE = [
@@ -135,6 +136,6 @@ LOGGING = {
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': 'http://elasticsearch:9200'  # matches the service name in docker-compose
+        'hosts': os.getenv('ELASTICSEARCH_HOST', 'http://elasticsearch:9200')
     },
 }

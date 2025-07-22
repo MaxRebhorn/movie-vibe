@@ -51,7 +51,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     container_name: django_web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
