@@ -1,29 +1,40 @@
 #!/bin/bash
+set -e
 
-# Warte auf Datenbank
-echo "Warte auf Datenbank..."
-while ! nc -z $POSTGRES_HOST 5432; do sleep 0.5; done
-echo "PostgreSQL ist erreichbar."
-
-# Warte auf Elasticsearch (mit Timeout)
-echo "Warte auf Elasticsearch..."
-timeout=30
-while ! curl -s http://elasticsearch:9200 >/dev/null; do
-  sleep 1
-  timeout=$((timeout-1))
-  [ $timeout -le 0 ] && echo "Elasticsearch Timeout!" && exit 1
+# Wait for PostgreSQL
+echo "Waiting for PostgreSQL..."
+while ! nc -z $POSTGRES_HOST 5432; do
+  sleep 0.5
 done
-echo "Elasticsearch ist erreichbar."
+echo "PostgreSQL is reachable."
 
-# Django-Setup
-echo "Führe Migrationen durch..."
+# Wait for Elasticsearch cluster health
+echo "Waiting for Elasticsearch cluster health..."
+timeout=120
+while ! curl -fs http://elasticsearch:9200/_cluster/health?pretty | \
+  grep -q "\"status\" : \"\(green\|yellow\)\""; do
+  sleep 5
+  timeout=$((timeout-5))
+  if [ $timeout -le 0 ]; then
+    echo "Elasticsearch health check timeout!"
+    exit 1
+  fi
+  echo "Waiting for Elasticsearch (${timeout}s remaining)..."
+done
+echo "Elasticsearch cluster is healthy."
+
+# Django setup
+echo "Running migrations..."
 python manage.py migrate
 
-echo "Erstelle Elasticsearch-Indizes..."
-python manage.py search_index --rebuild -f || echo "Warnung: search_index fehlgeschlagen"
+echo "Creating Elasticsearch indices..."
+python manage.py search_index --rebuild -f || {
+  echo "Warning: search_index command failed"
+  # Don't exit on this failure as it might be non-critical
+}
 
-echo "Prüfe Django-Setup..."
+echo "Checking Django setup..."
 python manage.py check
 
-echo "Starte den Server..."
+echo "Starting server..."
 exec "$@"
