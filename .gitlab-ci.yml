@@ -5,6 +5,7 @@ variables:
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "postgres"
   PYTHON_VERSION: "3.11"
+  ELASTICSEARCH_HOST: "http://elasticsearch:9200"
 
 services:
   - docker:20.10.24-dind
@@ -31,8 +32,6 @@ test:
     - docker compose exec web python manage.py migrate
     - docker compose exec web python manage.py createcachetable
 
-    # Optional: Nur wenn du keine `fixtures = [...]` nutzt:
-    # - docker compose exec web python manage.py loaddata movies.json
 
     # Tests
     - docker compose exec web pip install coverage --root-user-action=ignore
