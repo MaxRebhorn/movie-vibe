@@ -17,8 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 import movies
-from . import views
+from tmdb.view import CreateMovieView
 
 urlpatterns = [
-    path('movies/create', views.tmdbCreateMovie.as_view(), name='movie_list_create'),
+    path("api/movies/create", CreateMovieView.as_view(), name="create-movie")
 ]
