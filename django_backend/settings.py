@@ -139,3 +139,7 @@ ELASTICSEARCH_DSL = {
         'hosts': os.getenv('ELASTICSEARCH_DSL_HOSTS', 'http://elasticsearch:9200'),
     },
 }
+
+#API DATA
+API_KEY = os.getenv('API_KEY')
+API_TOKEN = os.getenv('API_TOKEN')
