@@ -20,6 +20,7 @@ import movies
 from . import views
 
 urlpatterns = [
-    path('api/movies/', views.MovieListCreateView.as_view(), name='movie_list_create'),
-    path('api/movies/<int:id>/', views.MovieDetailView.as_view(), name='movie_detail'),
+    path('movies/', views.MovieListCreateView.as_view(), name='movie_list_create'),
+    path('movies/<int:id>/', views.MovieDetailView.as_view(), name='movie_detail'),
+    path('movies/search/', views.MovieSearch.as_view(), name='movie_search')
 ]

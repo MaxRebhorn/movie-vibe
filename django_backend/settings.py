@@ -26,7 +26,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'movies'
+    'django_elasticsearch_dsl',
+    'movies',
+
 ]
 
 MIDDLEWARE = [
@@ -105,10 +107,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS Settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+CORS_ALLOW_ALL_ORIGINS = True  # Achtung: Nur für Dev!
 
 # Django REST Framework
 REST_FRAMEWORK = {
@@ -132,5 +131,11 @@ LOGGING = {
     'root': {
         'handlers': ['console'],
         'level': 'INFO',
+    },
+}
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': os.getenv('ELASTICSEARCH_DSL_HOSTS', 'http://elasticsearch:9200'),
     },
 }

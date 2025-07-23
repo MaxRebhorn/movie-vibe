@@ -4,8 +4,8 @@ variables:
   POSTGRES_DB: "test_db"
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "postgres"
-  POSTGRES_HOST: "db"
-  PYTHON_VERSION: "3.9"
+  PYTHON_VERSION: "3.11"
+  ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
 
 services:
   - docker:20.10.24-dind
@@ -21,18 +21,29 @@ before_script:
 build:
   stage: build
   script:
-    # Ensure entrypoint.sh exists and has execute permissions
-    - test -f docker/entrypoint.sh || echo "#!/bin/sh" > docker/entrypoint.sh
-    - chmod +x docker/entrypoint.sh
     - docker compose build
 
 test:
   stage: test
   script:
-    - docker compose up -d
-    - timeout 60s sh -c 'until docker compose exec db pg_isready -h db -p 5432; do sleep 2 ; done'
-    - docker compose exec web pip install -U pip
-    - docker compose exec web pip install -r requirements.txt
-    - docker compose exec web python manage.py test --noinput
-  after_script:
-    - docker compose down
+    - docker compose up -d --wait
+
+    # Datenbank bereit?
+    - docker compose exec web python manage.py migrate
+    - docker compose exec web python manage.py createcachetable
+
+
+    # Tests
+    - docker compose exec web pip install coverage --root-user-action=ignore
+    - docker compose exec web coverage run manage.py test --noinput
+    - docker compose exec web coverage report --fail-under=80
+    - docker compose exec web coverage xml
+
+    - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
+  artifacts:
+    paths:
+      - coverage.xml
+    expire_in: 1 week
+
+after_script:
+  - docker compose down
