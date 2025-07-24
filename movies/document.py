@@ -42,6 +42,7 @@ class MovieDocument(Document):
             'title',
             'original_title',
             'synopsis',
+            'plot',
             'tagline',
             'language',
             'country',

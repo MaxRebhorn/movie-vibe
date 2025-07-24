@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.dateparse import parse_date
 from tmdbv3api import Movie as tmdbMovie
 from tmdbv3api import TMDb
-
+from tmdb.services.wikipedia_service import get_movie_plot
 from movies.models import Movie
 
 tmdb = TMDb()
@@ -22,6 +22,7 @@ def get_movie_details(id):
     tmbd_movie_result = tmdbMovie()
 
     details = tmbd_movie_result.details(movie_id=id)
+
     return details
 
 def extract_further_details(id):
@@ -65,6 +66,11 @@ def create_movie_from_tmdb_details(details: dict) -> Movie:
     # Keywords (requires extra API call: /movie/{id}/keywords)
     keywords = [kw["name"] for kw in details.keywords["keywords"]] if hasattr(details, "keywords") else []
 
+    # Extract the year correctly
+    year = int(details.release_date[:4]) if details.release_date else None
+
+    # Get the Wikipedia plot
+    plot = get_movie_plot(title=details.title, original_title=details.original_title, year=year)
     # Trailer (from /movie/{id}/videos)
     trailer_url = None
     if hasattr(details, "videos"):
@@ -91,7 +97,8 @@ def create_movie_from_tmdb_details(details: dict) -> Movie:
         backdrop_url=TMDB_IMAGE_BASE + details.backdrop_path if details.backdrop_path else "",
         trailer_url=trailer_url,
         avg_rating=details.vote_average or 0.0,
-        tmdb_id=details.id
+        tmdb_id=details.id,
+        plot=plot
     )
 
     return movie

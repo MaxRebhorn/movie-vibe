@@ -20,6 +20,13 @@ services:
       interval: 5s
       timeout: 2s
       retries: 10
+  vektor:
+    image: qdrant/qdrant
+    ports:
+        - "6333:6333"
+        - "6334:6334" # optional: gRPC
+    volumes:
+       - qdrant_data:/qdrant/storage
 
   # Elasticsearch
   elasticsearch:
@@ -56,6 +63,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
+      - model_cache:/app/.cache
     ports:
       - "8000:8000"
     environment:
@@ -69,6 +77,8 @@ services:
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_DSL_HOSTS=${ELASTICSEARCH_DSL_HOSTS:-http://elasticsearch:9200}
       - API_KEY=${API_KEY}
+      - TRANSFORMERS_CACHE=/app/.cache
+      - SENTENCE_TRANSFORMERS_HOME=/app/.cache
     depends_on:
       db:
         condition: service_healthy
@@ -81,6 +91,8 @@ services:
 volumes:
   postgres_data:
   es_data:
+  qdrant_data:
+  model_cache:
 
 networks:
   django_network:
