@@ -147,3 +147,15 @@ ELASTICSEARCH_DSL = {
 #API DATA
 API_KEY = os.getenv('API_KEY')
 API_TOKEN = os.getenv('API_TOKEN')
+
+# Qdrant Config
+QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+QDRANT_VECTOR_SIZE = int(os.getenv("QDRANT_VECTOR_SIZE", 384))
+
+# Qdrant Collection Names for different embedding types
+QDRANT_COLLECTIONS = {
+    "vibe": os.getenv("QDRANT_COLLECTION_VIBE", "movies_vibe"),
+    "narrative": os.getenv("QDRANT_COLLECTION_NARRATIVE", "movies_narrative"),
+    "style": os.getenv("QDRANT_COLLECTION_STYLE", "movies_style"),
+    "combined": os.getenv("QDRANT_COLLECTION_COMBINED", "movies_combined"),
+}

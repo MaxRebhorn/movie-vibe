@@ -1,49 +1,52 @@
+# movies/services/vector_service.py
+
 from qdrant_client import QdrantClient
-from movies.services.embed_service import embed_model
+from qdrant_client.http.models import Filter, FieldCondition, MatchValue
+from django.conf import settings
 import uuid
+from qdrant_client.http.models import VectorParams, Distance
 
-# Qdrant-Client initialisieren (localhost + default port)
-client = QdrantClient(url="http://vektor:6333")
+client = QdrantClient(url=settings.QDRANT_URL)
+COLLECTIONS = settings.QDRANT_COLLECTIONS
 
+def save_embedding(embedding: list[float], id: str, payload: dict, vector_type: str):
+    collection = COLLECTIONS.get(vector_type)
+    if not collection:
+        raise ValueError(f"No collection configured for vector type '{vector_type}'")
 
+    # Ensure collection exists
+    existing_collections = [c.name for c in client.get_collections().collections]
+    if collection not in existing_collections:
+        print(f"Collection '{collection}' not found. Creating it now...")
+        client.recreate_collection(
+            collection_name=collection,
+            vectors_config=VectorParams(
+                size=len(embedding),
+                distance=Distance.COSINE
+            )
+        )
 
-COLLECTION_NAME = "movies"  # Name deiner Collection in Qdrant
+    print(f"Saving vector to collection: {collection}")
+    print(f"ID: {id}")
+    print(f"Payload: {payload}")
+    print(f"Vector length: {len(embedding)}")
 
-def save_embedding(embedding: list[float], id: int, payload: dict = None):
-    """
-    Speichert ein einzelnes Embedding in Qdrant.
-    :param embedding: Vektor als Liste von floats
-    :param id: Eindeutige ID für den Eintrag (z.B. Movie-ID)
-    :param payload: Optionale Metadaten (Titel, Genre etc.)
-    """
-    if payload is None:
-        payload = {}
+    # Convert id to int if possible, else raise error or handle UUID
+    try:
+        point_id = int(id)
+    except ValueError:
+        # Try UUID or raise
+        try:
+            point_id = uuid.UUID(id)
+        except ValueError:
+            raise ValueError(f"Point id '{id}' is invalid. Must be int or UUID.")
 
     client.upsert(
-        collection_name=COLLECTION_NAME,
+        collection_name=collection,
         points=[{
-            "id": id,
+            "id": point_id,
             "vector": embedding,
             "payload": payload
         }]
     )
 
-def embed_to_db(movie):
-    """
-    Embeddet einen Film und speichert alle Embeddings in Qdrant.
-    """
-    # embed_model gibt dir ein Dict zurück mit z.B. mehreren Embeddings
-    embeddings = embed_model(movie)
-
-    # Beispiel: Du speicherst alle drei Embeddings separat in Qdrant,
-    # dabei kannst du unterschiedliche IDs nehmen (z.B. MovieID + suffix)
-    for key, embedding in embeddings.items():
-        # Generiere eine UUID (kannst du auch aus movie.tmdb_id + key hashen, aber einfacher erstmal so)
-        point_id = str(uuid.uuid4())
-
-        payload = {
-            "title": movie.title,
-            "type": key,
-            "movie_tmdb_id": movie.tmdb_id,
-        }
-        save_embedding(embedding, point_id, payload)

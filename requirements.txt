@@ -10,5 +10,6 @@ tmdbv3api==1.9.0
 wikipedia==1.4.0
 sentence-transformers>=2.2.2
 qdrant-client==1.7.0
-django_elasticsearch_dsl
+elasticsearch<8
+django-elasticsearch-dsl<8
 
