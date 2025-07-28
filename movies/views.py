@@ -1,3 +1,5 @@
+import logging
+
 from qdrant_client.http.exceptions import UnexpectedResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,7 +9,7 @@ from .serializers import MovieSerializer
 from django.shortcuts import get_object_or_404
 from .services.movie_search import MovieSearchService
 from .services.vector_search import get_similar_movies
-
+logger = logging.getLogger(__name__)
 
 class MovieListCreateView(APIView):
     def get(self, request):
@@ -40,7 +42,8 @@ class MovieDetailView(APIView):
 
         try:
             # Step 3: Get similar movie IDs from vector DB
-            similar_ids = get_similar_movies(reference_movie, limit)
+            # CHANGED: Using single vector type instead of set
+            similar_ids = get_similar_movies(reference_movie, k=limit)
 
             # Step 4: Fetch those movies from the database
             similar_movies = Movie.objects.filter(id__in=similar_ids)
@@ -93,37 +96,21 @@ class MovieSimilarView(APIView):
         reference_movie = get_object_or_404(Movie, id=id)
 
         try:
-            similar_ids = get_similar_movies(reference_movie, vector_type="movies_vibe", k=limit)
-
-            if not similar_ids:
-                # No vectors found or returned
-                return Response(
-                    {"message": "No similar vectors found for this movie."},
-                    status=status.HTTP_200_OK,
-                )
+            # CHANGED: Use single vector type parameter
+            similar_ids = get_similar_movies(
+                movie_id=reference_movie.id,
+                limit=limit,
+                collection="movies_vibe"
+            )
 
             similar_movies = Movie.objects.filter(id__in=similar_ids)
-            if not similar_movies.exists():
-                # No movies found in DB matching those IDs
-                return Response(
-                    {"message": "Similar vectors found, but no matching movies in database."},
-                    status=status.HTTP_200_OK,
-                )
 
-            # Order movies in the same order as IDs
-            movie_map = {movie.id: movie for movie in similar_movies}
-            ordered = [movie_map[mid] for mid in similar_ids if mid in movie_map]
 
-            if not ordered:
-                return Response(
-                    {"message": "Similar vectors found, movies fetched, but no movies match the ordering."},
-                    status=status.HTTP_200_OK,
-                )
-
-            serializer = MovieSerializer(ordered, many=True)
+            serializer = MovieSerializer(similar_movies, many=True)
             return Response(serializer.data)
 
         except UnexpectedResponse as e:
+            logger.exception(f"Vector search failed for movie ID {reference_movie.id}: {e}")
             return Response(
                 {"error": "Vector search failed", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,

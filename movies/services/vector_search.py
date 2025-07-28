@@ -1,94 +1,68 @@
-# movies/services/vector_search.py
-
-from qdrant_client import QdrantClient
-from qdrant_client.http.models import Filter, FieldCondition, MatchValue
+import requests
+from typing import List, Dict
 from django.conf import settings
-import numpy as np
+from qdrant_client import QdrantClient, models
 
-# Initialize Qdrant client using the URL from settings
+COLLECTIONS = {
+    "vibe": settings.QDRANT_COLLECTIONS["movies_vibe"],
+    "narrative": settings.QDRANT_COLLECTIONS["movies_narrative"],
+    "style": settings.QDRANT_COLLECTIONS["movies_style"],
+}
+
+QDRANT_URL = settings.QDRANT_URL  # e.g. "http://localhost:6333"
 client = QdrantClient(url=settings.QDRANT_URL)
-
-# Collection mapping, e.g., {"vibe": "movie_vibe", ...}
-COLLECTIONS = settings.QDRANT_COLLECTIONS
-
-def _get_vector_for_movie(movie, vector_type: str) -> list[float] | None:
-    """
-    Fetch the vector for a specific movie and vector type from Qdrant.
-    Uses `scroll()` because we are not doing similarity search here.
-    """
-    collection = COLLECTIONS.get(vector_type)
-    if not collection:
-        raise ValueError(f"No collection for vector type '{vector_type}'")
-
-    result, _ = client.scroll(
-        collection_name=collection,
-        scroll_filter=Filter(
-            must=[
-                FieldCondition(key="movie_id", match=MatchValue(value=movie.id)),
-                FieldCondition(key="type", match=MatchValue(value=vector_type)),
+def get_vector_from_qdrant(collection: str, point_id: int) -> List[float]:
+    url = f"{QDRANT_URL}/collections/{collection}/points/scroll"
+    payload = {
+        "filter": {
+            "must": [
+                {"key": "id", "match": {"value": point_id}}
             ]
-        ),
-        limit=1
-    )
+        },
+        "limit": 1,
+        "with_vector": True,
+        "with_payload": False
+    }
+    response = requests.post(url, json=payload)
+    response.raise_for_status()
+    data = response.json()
 
-    if not result:
-        raise ValueError(f"No vector found for movie ID {movie.id} with type '{vector_type}'")
+    points = data.get("result", {}).get("points", [])
+    if not points:
+        raise ValueError(f"No point with ID {point_id} in collection {collection}.")
+    vector = points[0].get("vector")
+    if not vector:
+        raise ValueError(f"No vector for point {point_id} in collection {collection}.")
+    return vector
 
-    return result[0].vector
+def search_similar(collection: str, vector: List[float], limit: int, exclude_id: int) -> List[int]:
+    url = f"{QDRANT_URL}/collections/{collection}/points/search"
+    payload = {
+        "vector": vector,
+        "limit": limit + 1,
+        "with_payload": False,
+        "with_vector": False,
+        "filter": {
+            "must_not": [
+                {"key": "id", "match": {"value": exclude_id}}
+            ]
+        }
+    }
+    response = requests.post(url, json=payload)
+    response.raise_for_status()
+    data = response.json()
 
-def _get_combined_vector(movie, types=("vibe", "narrative", "style")):
-    """
-    Compute the mean of multiple vector types for a movie.
-    Returns None if no vectors are found.
-    """
-    vectors = []
-    for t in types:
-        try:
-            v = _get_vector_for_movie(movie, t)
-            if v:
-                vectors.append(np.array(v))
-        except ValueError:
-            continue  # Skip missing vectors
-    if not vectors:
-        return None
-    return np.mean(vectors, axis=0).tolist()
+    points = data.get("result", [])
+    filtered_ids = [pt["id"] for pt in points][:limit]
+    return filtered_ids
 
-def get_similar_movies(movie, vector_type="vibe", k=5) -> list[int]:
-    """
-    Search Qdrant for similar movies based on a vector.
-    Returns a list of up to `k` movie IDs, excluding the query movie.
-    """
-    try:
-        if vector_type == "all":
-            query_vector = _get_combined_vector(movie)
-            collection = COLLECTIONS.get("combined")
-            type_filter = "combined"
-        else:
-            query_vector = _get_vector_for_movie(movie, vector_type)
-            collection = COLLECTIONS.get(vector_type)
-            type_filter = vector_type
-
-        if not collection:
-            raise ValueError(f"No collection defined for vector type '{vector_type}'")
-
-    except ValueError as e:
-        print(f"[ERROR] {e}")
-        return []
-
-    if not query_vector:
-        return []
-
-    results = client.search(
+def get_similar_movies(movie_id: int, limit: int,collection:str):
+    return unpack_movies(client.query_points(
         collection_name=collection,
-        query_vector=query_vector,
-        query_filter=Filter(
-            must=[FieldCondition(key="type", match=MatchValue(value=type_filter))]
-        ),
-        limit=k + 5  # Slight overfetch to exclude original movie
+        query=movie_id,  # <--- point id
+        limit=limit
+    )
     )
 
-    return [
-        res.payload.get("movie_id")
-        for res in results
-        if res.payload.get("movie_id") != movie.id
-    ][:k]
+def unpack_movies(response):
+    return [point.payload["movie_id"] for point in response.points]

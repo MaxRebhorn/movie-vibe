@@ -154,8 +154,8 @@ QDRANT_VECTOR_SIZE = int(os.getenv("QDRANT_VECTOR_SIZE", 384))
 
 # Qdrant Collection Names for different embedding types
 QDRANT_COLLECTIONS = {
-    "vibe": os.getenv("QDRANT_COLLECTION_VIBE", "movies_vibe"),
-    "narrative": os.getenv("QDRANT_COLLECTION_NARRATIVE", "movies_narrative"),
-    "style": os.getenv("QDRANT_COLLECTION_STYLE", "movies_style"),
-    "combined": os.getenv("QDRANT_COLLECTION_COMBINED", "movies_combined"),
+    "movies_vibe": os.getenv("QDRANT_COLLECTION_VIBE", "movies_vibe"),
+    "movies_narrative": os.getenv("QDRANT_COLLECTION_NARRATIVE", "movies_narrative"),
+    "movies_style": os.getenv("QDRANT_COLLECTION_STYLE", "movies_style"),
+    "movies_combined": os.getenv("QDRANT_COLLECTION_COMBINED", "movies_combined"),
 }

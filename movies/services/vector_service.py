@@ -1,7 +1,7 @@
 # movies/services/vector_service.py
 
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import Filter, FieldCondition, MatchValue
+from qdrant_client.http.models import Filter, FieldCondition, MatchValue, PointStruct
 from django.conf import settings
 import uuid
 from qdrant_client.http.models import VectorParams, Distance
@@ -9,7 +9,7 @@ from qdrant_client.http.models import VectorParams, Distance
 client = QdrantClient(url=settings.QDRANT_URL)
 COLLECTIONS = settings.QDRANT_COLLECTIONS
 
-def save_embedding(embedding: list[float], id: str, payload: dict, vector_type: str):
+def save_embedding(embedding: list[float], id: int, payload: dict, vector_type: str):
     collection = COLLECTIONS.get(vector_type)
     if not collection:
         raise ValueError(f"No collection configured for vector type '{vector_type}'")
@@ -32,21 +32,16 @@ def save_embedding(embedding: list[float], id: str, payload: dict, vector_type: 
     print(f"Vector length: {len(embedding)}")
 
     # Convert id to int if possible, else raise error or handle UUID
-    try:
-        point_id = int(id)
-    except ValueError:
-        # Try UUID or raise
-        try:
-            point_id = uuid.UUID(id)
-        except ValueError:
-            raise ValueError(f"Point id '{id}' is invalid. Must be int or UUID.")
+    if not isinstance(id, int):
+        raise ValueError(f"Expected int ID, got {type(id)}")
+    point_id = id
 
-    client.upsert(
+    operation_info = client.upsert(
         collection_name=collection,
-        points=[{
-            "id": point_id,
-            "vector": embedding,
-            "payload": payload
-        }]
-    )
+        wait=True,
+        points=[
+            PointStruct(id=point_id, vector=embedding, payload=payload),
 
+        ]
+    )
+    print(operation_info)
