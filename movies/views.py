@@ -100,7 +100,7 @@ class MovieSimilarView(APIView):
             similar_ids = get_similar_movies(
                 movie_id=reference_movie.id,
                 limit=limit,
-                collection="movies_vibe"
+                collection="movies_narrative"
             )
 
             similar_movies = Movie.objects.filter(id__in=similar_ids)

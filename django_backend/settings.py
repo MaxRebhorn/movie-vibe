@@ -31,7 +31,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_elasticsearch_dsl',
     'movies',
-    'tmdb'
+    'tmdb',
+    'review',
+    'user'
 
 ]
 
@@ -70,11 +72,11 @@ WSGI_APPLICATION = 'django_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'django_db'),
-        'USER': os.getenv('POSTGRES_USER', 'django_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'django_password'),
-        'HOST': os.getenv('POSTGRES_HOST', 'db'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),  # Only default for port
     }
 }
 
@@ -94,6 +96,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'user.User'
 # Internationalization
 LANGUAGE_CODE = 'de-de'
 TIME_ZONE = 'Europe/Berlin'
@@ -122,6 +125,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ]
 }
+# AUTH_USER_MODEL = 'user.User'
 
 # Logging
 LOGGING = {
