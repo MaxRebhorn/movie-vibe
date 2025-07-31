@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   db:
     image: postgres:15
     container_name: django_postgres
@@ -19,13 +20,53 @@ services:
       interval: 5s
       timeout: 2s
       retries: 10
+  vektor:
+    environment:
+      - QDRANT_HOST=vektor
+      - QDRANT_PORT=6333
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - django_network
 
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: django_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - django_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  # Django Backend
   web:
     build:
       context: .
       dockerfile: docker/Dockerfile
     container_name: django_web
-    command: /app/docker/entrypoint.sh python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
       - model_cache:/app/.cache
@@ -33,34 +74,30 @@ services:
       - "8000:8000"
     environment:
       - DEBUG=1
+      - POSTGRES_DB=${POSTGRES_DB:-django_db}
+      - POSTGRES_USER=${POSTGRES_USER:-django_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-django_password}
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_DSL_HOSTS=${ELASTICSEARCH_DSL_HOSTS:-http://elasticsearch:9200}
+      - API_KEY=${API_KEY}
+      - TRANSFORMERS_CACHE=/app/.cache
+      - SENTENCE_TRANSFORMERS_HOME=/app/.cache
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      - django_network
-
-  test:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    container_name: django_test
-    command: bash -c "python manage.py migrate && python manage.py test --keepdb"
-    volumes:
-      - .:/app
-    environment:
-      - DEBUG=0
-      - POSTGRES_HOST=db
-      - TEST_DATABASE_NAME=test_django_db
-    depends_on:
-      db:
+      elasticsearch:
         condition: service_healthy
     networks:
       - django_network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+  es_data:
+  qdrant_data:
   model_cache:
 
 networks:

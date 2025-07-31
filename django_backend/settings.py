@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     'movies',
     'tmdb',
     'review',
-    'user'
+    'user.apps.UserConfig',
 
 ]
 
@@ -72,14 +72,11 @@ WSGI_APPLICATION = 'django_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'django_db'),
-        'USER': os.getenv('POSTGRES_USER', 'django_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'django_password'),
-        'HOST': os.getenv('POSTGRES_HOST', 'db'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-        'TEST': {
-            'NAME': os.getenv('TEST_DATABASE_NAME', 'test_django_db'),
-        }
+        'NAME': os.environ.get('POSTGRES_DB', 'db'),
+        'USER': os.environ.get('POSTGRES_USER', 'db'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'db'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'db'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
 }
 
@@ -99,7 +96,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = 'auth.User'
 # Internationalization
 LANGUAGE_CODE = 'de-de'
 TIME_ZONE = 'Europe/Berlin'
@@ -128,7 +125,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ]
 }
-# AUTH_USER_MODEL = 'user.User'
 
 # Logging
 LOGGING = {

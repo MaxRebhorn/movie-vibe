@@ -1,7 +1,8 @@
 # users/urls.py
 
 from django.urls import path
-from .views import (
+from django.urls import path
+from .views import (  # Ensure this is a relative import
     RegisterView,
     ProfileView,
     UpdateProfileView,

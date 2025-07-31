@@ -15,12 +15,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from review.views import MovieReviewViewSet
+from .views import MovieReviewViewSet
 
 review_create = MovieReviewViewSet.as_view({'post': 'create'})
 review_list = MovieReviewViewSet.as_view({'get': 'list'})
 
 urlpatterns = [
-    path('movies/<int:movie_id>/reviews/', review_list, name='movie_review_list'),
-    path('movies/<int:movie_id>/reviews/create/', review_create, name='movie_review_create'),
+    path('movies/<int:movie_id>/reviews/', review_list, name='movie-review-list'),
+    path('movies/<int:movie_id>/reviews/create/', review_create, name='movie-review-create'),
 ]

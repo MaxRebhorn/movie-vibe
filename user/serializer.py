@@ -1,42 +1,59 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from movies.serializers import MovieSerializer
-from review.serializer import ReviewSerializer  # Uncommented
-from .models import User
+from review.serializer import ReviewSerializer
+from .models import UserProfile
+
 
 class UserSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
     favorite_movies = MovieSerializer(many=True, read_only=True)
-    reviews = ReviewSerializer(many=True, read_only=True)  # Uncommented
+    reviews = ReviewSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'full_name', 'favorite_movies', 'reviews']
+        fields = ['id', 'username', 'email', 'full_name', 'favorite_movies', 'reviews']
 
+    def get_full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
 
     class Meta:
         model = User
-        fields = ['email', 'full_name', 'password']
+        fields = ['username', 'email', 'password', 'first_name', 'last_name']
 
     def create(self, validated_data):
-        # Use create_user method to handle password hashing etc.
-        return User.objects.create_user(**validated_data)
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
+        )
+        # Create profile for new user
+        UserProfile.objects.create(user=user)
+        return user
+
 
 class UpdateUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
 
     class Meta:
         model = User
-        fields = ['email', 'full_name', 'password']
+        fields = ['email', 'first_name', 'last_name', 'password']
 
     def update(self, instance, validated_data):
-        # Update email and full_name normally
         instance.email = validated_data.get('email', instance.email)
-        instance.full_name = validated_data.get('full_name', instance.full_name)
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
 
-        # If password provided, set it properly (hashing)
         password = validated_data.get('password', None)
         if password:
             instance.set_password(password)
