@@ -15,10 +15,6 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-
-        if not extra_fields.get("is_staff") or not extra_fields.get("is_superuser"):
-            raise ValueError("Superuser must have is_staff=True and is_superuser=True")
-
         return self.create_user(email, password, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -27,7 +23,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
-    # favorite_movies = models.ManyToManyField('movies.Movie', related_name='favorited_by', blank=True)
+    favorite_movies = models.ManyToManyField(
+        'movies.Movie',
+        related_name='favorited_by',
+        blank=True
+    )
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
