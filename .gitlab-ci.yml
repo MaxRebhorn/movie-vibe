@@ -1,14 +1,13 @@
 image: docker:20.10.24
 
 variables:
-  POSTGRES_DB: "db"
-  POSTGRES_USER: "db"
-  POSTGRES_PASSWORD: "db"
-  POSTGRES_HOST: "db"
-  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "test_db"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
-  QDRANT_URL: "http://vektor:6333"
-  DEBUG: "1"
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
 
 services:
   - docker:20.10.24-dind
@@ -20,28 +19,56 @@ stages:
 before_script:
   - docker info
   - docker compose version
-  - docker compose down -v --remove-orphans
   - docker volume prune -f
-  - docker compose exec db psql -U db -c "DROP DATABASE IF EXISTS db;"
-  - docker compose exec db psql -U db -c "CREATE DATABASE db;"
-
 
 build:
   stage: build
   script:
+    - docker compose down -v --remove-orphans
     - docker compose build
 
 test:
   stage: test
   script:
-    - docker volume rm ci_postgres_data || true
+    # Create .env file dynamically
+    - |
+      cat <<EOF > .env
+      POSTGRES_DB=db
+      POSTGRES_USER=db
+      POSTGRES_PASSWORD=db
+      POSTGRES_HOST=db
+      POSTGRES_PORT=5432
+      DEBUG=1
+      ELASTICSEARCH_HOST=http://elasticsearch:9200
+      QDRANT_URL=http://vektor:6333
+      QDRANT_VECTOR_SIZE=384
+      QDRANT_COLLECTION_VIBE=movies_vibe
+      QDRANT_COLLECTION_NARRATIVE=movies_narrative
+      QDRANT_COLLECTION_STYLE=movies_style
+      QDRANT_COLLECTION_COMBINED=movies_combined
+      EOF
+
+    # Start services
     - docker compose up -d --wait
-    - docker compose exec web python manage.py check
+
+    # Optional: Wait for DB to be ready (important for exec to work)
+    - until docker compose exec db pg_isready -U db; do sleep 1; done
+
+    # Drop DB if needed
+    - docker compose exec db psql -U db -c "DROP DATABASE IF EXISTS db;"
+
+    # Apply migrations
     - docker compose exec web python manage.py migrate --no-input
+
+    # Install coverage
     - docker compose exec web pip install coverage --root-user-action=ignore
+
+    # Run tests with coverage
     - docker compose exec web coverage run manage.py test --noinput --verbosity=3
     - docker compose exec web coverage report --fail-under=80
     - docker compose exec web coverage xml
+
+    # Copy coverage file
     - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
 
   artifacts:
