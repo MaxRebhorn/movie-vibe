@@ -1,11 +1,14 @@
 image: docker:20.10.24
 
 variables:
-  POSTGRES_DB: "test_db"
-  POSTGRES_USER: "postgres"
-  POSTGRES_PASSWORD: "postgres"
-  PYTHON_VERSION: "3.11"
+  POSTGRES_DB: "db"
+  POSTGRES_USER: "db"
+  POSTGRES_PASSWORD: "db"
+  POSTGRES_HOST: "db"
+  POSTGRES_PORT: "5432"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
+  QDRANT_URL: "http://vektor:6333"
+  DEBUG: "1"
 
 services:
   - docker:20.10.24-dind
@@ -15,11 +18,8 @@ stages:
   - test
 
 before_script:
-  # Display Docker environment info
   - docker info
   - docker compose version
-
-  # Tear down any previous containers and volumes
   - docker compose down -v --remove-orphans
   - docker volume prune -f
 
@@ -31,27 +31,14 @@ build:
 test:
   stage: test
   script:
-    # Forcefully delete volume before services start
-    - docker volume rm movie-vibe_postgres_data || true
-
-    # Start services and wait until healthy
+    - docker volume rm ci_postgres_data || true
     - docker compose up -d --wait
-
-    # Run Django system checks
     - docker compose exec web python manage.py check
-
-    # Apply migrations — will fail if sequence conflict exists
     - docker compose exec web python manage.py migrate --no-input
-
-    # Install test dependencies
     - docker compose exec web pip install coverage --root-user-action=ignore
-
-    # Run tests with coverage
     - docker compose exec web coverage run manage.py test --noinput --verbosity=3
     - docker compose exec web coverage report --fail-under=80
     - docker compose exec web coverage xml
-
-    # Copy coverage file from container to CI host
     - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
 
   artifacts:
@@ -60,6 +47,5 @@ test:
     expire_in: 1 week
 
 after_script:
-  # Clean up everything to avoid persistence between CI jobs
   - docker compose down -v --remove-orphans
   - docker volume prune -f
