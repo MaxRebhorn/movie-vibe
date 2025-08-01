@@ -22,6 +22,9 @@ before_script:
   - docker compose version
   - docker compose down -v --remove-orphans
   - docker volume prune -f
+  - docker compose exec db psql -U db -c "DROP DATABASE IF EXISTS db;"
+  - docker compose exec db psql -U db -c "CREATE DATABASE db;"
+
 
 build:
   stage: build
