@@ -15,10 +15,13 @@ stages:
   - test
 
 before_script:
+  # Display Docker environment info
   - docker info
   - docker compose version
-  # Clean up any previous containers and volumes
+
+  # Tear down any previous containers and volumes
   - docker compose down -v --remove-orphans
+  - docker volume prune -f
 
 build:
   stage: build
@@ -28,14 +31,16 @@ build:
 test:
   stage: test
   script:
-    # Start services and wait for them to be healthy
+    # Start services and wait until healthy
     - docker compose up -d --wait
 
-    # Database setup - simplified migration process
+    # Run Django system checks
     - docker compose exec web python manage.py check
+
+    # Apply migrations — will fail if sequence conflict exists
     - docker compose exec web python manage.py migrate --no-input
 
-    # Install test requirements
+    # Install test dependencies
     - docker compose exec web pip install coverage --root-user-action=ignore
 
     # Run tests with coverage
@@ -43,12 +48,15 @@ test:
     - docker compose exec web coverage report --fail-under=80
     - docker compose exec web coverage xml
 
-    # Copy coverage file
+    # Copy coverage file from container to CI host
     - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
+
   artifacts:
     paths:
       - coverage.xml
     expire_in: 1 week
 
 after_script:
-  - docker compose down -v
+  # Clean up everything to avoid persistence between CI jobs
+  - docker compose down -v --remove-orphans
+  - docker volume prune -f
