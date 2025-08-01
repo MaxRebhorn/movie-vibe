@@ -44,7 +44,7 @@ test:
     - docker compose exec web pip install coverage --root-user-action=ignore
 
     # Run tests with coverage
-    - docker compose exec web coverage run manage.py test --noinput
+    - docker compose exec web coverage run manage.py test --noinput --verbosity=3
     - docker compose exec web coverage report --fail-under=80
     - docker compose exec web coverage xml
 
