@@ -29,9 +29,11 @@ class MovieSearch(APIView):
         query = request.GET.get("q", "").strip()
         genre = request.GET.get("genre")
         min_rating = request.GET.get("min_rating")
-        tags = request.GET.get("tags")
+        keywords = request.GET.get("keywords")
         year_from = request.GET.get("year_from")
         year_to = request.GET.get("year_to")
+        language = request.GET.get("language")
+        country = request.GET.get("country")
 
         if not query:
             return Response([])
@@ -45,24 +47,28 @@ class MovieSearch(APIView):
         qs = Movie.objects.filter(id__in=movie_ids)
 
         if genre:
-            qs = qs.filter(genre__iexact=genre)
+            qs = qs.filter(genres__contains=[genre])
 
         if min_rating:
             try:
-                qs = qs.filter(rating__gte=float(min_rating))
+                qs = qs.filter(avg_rating__gte=float(min_rating))
             except ValueError:
                 return Response({"error": "Invalid min_rating"}, status=400)
 
         if year_from:
-            qs = qs.filter(year__gte=year_from)
+            qs = qs.filter(release_date__year__gte=year_from)
         if year_to:
-            qs = qs.filter(year__lte=year_to)
+            qs = qs.filter(release_date__year__lte=year_to)
 
-        if tags:
-            tag_names = [t.strip() for t in tags.split(",") if t.strip()]
-            qs = qs.filter(
-                movietagaggregate__tag__name__in=tag_names
-            ).distinct()
+        if keywords:
+            keyword_list = [k.strip() for k in keywords.split(",") if k.strip()]
+            qs = qs.filter(keywords__overlap=keyword_list)
+
+        if language:
+            qs = qs.filter(language__iexact=language)
+
+        if country:
+            qs = qs.filter(country__iexact=country)
 
         # Step 3: Map by ES order
         movie_map = {str(movie.id): movie for movie in qs}

@@ -24,4 +24,5 @@ urlpatterns = [
     path('movies/<int:id>/', views.MovieDetailView.as_view(), name='movie_detail'),
     path('movies/search/', views.MovieSearch.as_view(), name='movie_search'),
     path('movies/<int:id>/similar/', views.MovieSimilarView.as_view(), name='movie_similar'),
+    path('movies/search/', views.MovieSearch.as_view(), name='movie_search'),
 ]
