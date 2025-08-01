@@ -31,6 +31,9 @@ build:
 test:
   stage: test
   script:
+    # Forcefully delete volume before services start
+    - docker volume rm movie-vibe_postgres_data || true
+
     # Start services and wait until healthy
     - docker compose up -d --wait
 
