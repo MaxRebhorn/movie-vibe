@@ -27,13 +27,8 @@ test:
   stage: test
   script:
     - docker compose up -d --wait
-
-    # Datenbank bereit?
-    - docker compose exec web python manage.py migrate
-    - docker compose exec web python manage.py createcachetable
-
-
-    # Tests
+    # Only ensure services are healthy, skip main DB migrations
+    # Run tests directly - Django will handle test DB creation
     - docker compose exec web pip install coverage --root-user-action=ignore
     - docker compose exec web coverage run manage.py test --noinput
     - docker compose exec web coverage report --fail-under=80
