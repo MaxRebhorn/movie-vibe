@@ -1,4 +1,4 @@
-version: '3.8'
+ersion: '3.8'
 
 services:
   # PostgreSQL Database
@@ -41,7 +41,7 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - bootstrap.memory_lock=true
     ulimits:
       memlock:
@@ -55,10 +55,10 @@ services:
     networks:
       - django_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9200"]
-      interval: 5s
-      timeout: 2s
-      retries: 10
+      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      interval: 10s  # Increased from 5s
+      timeout: 5s    # Increased from 2s
+      retries: 20    # Increased from 10
 
   # Django Backend
   web:
