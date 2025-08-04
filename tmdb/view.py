@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from services import get_movie_by_name, create_movie_from_tmdb_details, tmdbMovie
+from tmdb.services.api_service import get_movie_by_name, create_movie_from_tmdb_details, tmdbMovie
 from movies.serializers import MovieSerializer
 from movies.models import Movie
 

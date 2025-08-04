@@ -5,6 +5,7 @@ class Movie(models.Model):
     title = models.CharField(max_length=50)
     original_title = models.CharField(max_length=50)
     synopsis = models.TextField()  # Changed to TextField for longer content
+    plot = models.TextField(null=True)
     tagline = models.CharField(max_length=255)
     language = models.CharField(max_length=50)
     country = models.CharField(max_length=4)

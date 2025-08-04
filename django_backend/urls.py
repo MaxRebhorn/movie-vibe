@@ -20,4 +20,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('movies.urls')),
+    path('api/', include('review.urls')),  # Added review URLs
+    path('api/', include('user.urls')),    # Assuming you have user app
 ]

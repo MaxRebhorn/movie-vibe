@@ -14,14 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path
-import movies
-from . import views
+from .views import MovieReviewViewSet
+
+review_create = MovieReviewViewSet.as_view({'post': 'create'})
+review_list = MovieReviewViewSet.as_view({'get': 'list'})
 
 urlpatterns = [
-    path('movies/', views.MovieListCreateView.as_view(), name='movie_list_create'),
-    path('movies/<int:id>/', views.MovieDetailView.as_view(), name='movie_detail'),
-    path('movies/search/', views.MovieSearch.as_view(), name='movie_search'),
-    path('movies/<int:id>/similar/', views.MovieSimilarView.as_view(), name='movie_similar'),
+    path('movies/<int:movie_id>/reviews/', review_list, name='movie-review-list'),
+    path('movies/<int:movie_id>/reviews/create/', review_create, name='movie-review-create'),
 ]

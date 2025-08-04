@@ -31,7 +31,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_elasticsearch_dsl',
     'movies',
-    'tmdb'
+    'tmdb',
+    'review',
+    'user.apps.UserConfig',
 
 ]
 
@@ -70,11 +72,11 @@ WSGI_APPLICATION = 'django_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'django_db'),
-        'USER': os.getenv('POSTGRES_USER', 'django_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'django_password'),
-        'HOST': os.getenv('POSTGRES_HOST', 'db'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'NAME': os.environ.get('POSTGRES_DB', 'db'),
+        'USER': os.environ.get('POSTGRES_USER', 'db'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'db'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'db'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
 }
 
@@ -94,6 +96,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'auth.User'
 # Internationalization
 LANGUAGE_CODE = 'de-de'
 TIME_ZONE = 'Europe/Berlin'
@@ -147,3 +150,15 @@ ELASTICSEARCH_DSL = {
 #API DATA
 API_KEY = os.getenv('API_KEY')
 API_TOKEN = os.getenv('API_TOKEN')
+
+# Qdrant Config
+QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+QDRANT_VECTOR_SIZE = int(os.getenv("QDRANT_VECTOR_SIZE", 384))
+
+# Qdrant Collection Names for different embedding types
+QDRANT_COLLECTIONS = {
+    "movies_vibe": os.getenv("QDRANT_COLLECTION_VIBE", "movies_vibe"),
+    "movies_narrative": os.getenv("QDRANT_COLLECTION_NARRATIVE", "movies_narrative"),
+    "movies_style": os.getenv("QDRANT_COLLECTION_STYLE", "movies_style"),
+    "movies_combined": os.getenv("QDRANT_COLLECTION_COMBINED", "movies_combined"),
+}
