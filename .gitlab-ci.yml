@@ -66,16 +66,7 @@ test:
     - echo "=== Generating Coverage Report ==="
     - docker compose exec -T web coverage report --fail-under=80
     - docker compose exec -T web coverage xml
-    - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
 
-  artifacts:
-    paths:
-      - coverage.xml
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
-    expire_in: 1 week
 
 after_script:
   - echo "=== Cleanup Phase ==="
