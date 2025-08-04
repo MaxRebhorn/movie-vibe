@@ -4,6 +4,9 @@ Django settings for django_backend project.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,6 +31,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_elasticsearch_dsl',
     'movies',
+    'tmdb'
 
 ]
 
@@ -139,3 +143,7 @@ ELASTICSEARCH_DSL = {
         'hosts': os.getenv('ELASTICSEARCH_DSL_HOSTS', 'http://elasticsearch:9200'),
     },
 }
+
+#API DATA
+API_KEY = os.getenv('API_KEY')
+API_TOKEN = os.getenv('API_TOKEN')

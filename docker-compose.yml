@@ -68,6 +68,7 @@ services:
       - ELASTICSEARCH_HOST=elasticsearch
       - ELASTICSEARCH_PORT=9200
       - ELASTICSEARCH_DSL_HOSTS=${ELASTICSEARCH_DSL_HOSTS:-http://elasticsearch:9200}
+      - API_KEY=${API_KEY}
     depends_on:
       db:
         condition: service_healthy
