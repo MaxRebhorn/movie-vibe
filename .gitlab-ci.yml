@@ -1,4 +1,6 @@
-image: docker:20.10.24
+image: docker:24.0
+services:
+  - docker:24.0-dind
 
 variables:
   POSTGRES_DB: "test_db"
@@ -6,38 +8,83 @@ variables:
   POSTGRES_PASSWORD: "postgres"
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
-
-services:
-  - docker:20.10.24-dind
+  ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+  DOCKER_TLS_CERTDIR: "/certs"
+  COMPOSE_PARALLEL_LIMIT: "1"
+  COMPOSE_HTTP_TIMEOUT: "120"
 
 stages:
   - build
   - test
 
 before_script:
+  - apk add --no-cache docker-compose curl python3 py3-pip procps
   - docker info
   - docker compose version
+  - echo "=== Initial System Resources ==="
+  - free -m
+  - df -h
+  - echo "=== Docker System Prune ==="
+  - docker system prune -af
+  - docker builder prune -af
 
 build:
   stage: build
   script:
+    - echo "=== Building with Memory Constraints ==="
     - docker compose -f docker-compose.yml -f docker-compose.override.yml build
+    - echo "=== Post-build Resources ==="
+    - docker stats --no-stream || true
 
 test:
   stage: test
   script:
+    - echo "=== Starting Services with Resource Limits ==="
     - docker compose -f docker-compose.yml -f docker-compose.override.yml up -d --wait
-    - docker compose exec web python manage.py migrate
-    - docker compose exec web python manage.py createcachetable
-    - docker compose exec web pip install coverage --root-user-action=ignore
-    - docker compose exec web coverage run manage.py test --noinput
-    - docker compose exec web coverage report --fail-under=80
-    - docker compose exec web coverage xml
+    - echo "=== Service Health Checks ==="
+    - docker compose ps
+    - echo "=== Container Resource Usage ==="
+    - docker stats --no-stream || true
+    - echo "=== System Resources Before Tests ==="
+    - free -m
+    - top -b -n 1 -o %MEM | head -10
+
+    - echo "=== Running Database Migrations ==="
+    - docker compose exec -T web python manage.py migrate
+    - docker compose exec -T web python manage.py createcachetable
+
+    - echo "=== Installing Coverage ==="
+    - docker compose exec -T web pip install coverage --root-user-action=ignore
+
+    - echo "=== Running Tests with Memory Monitoring ==="
+    - docker compose exec -T web sh -c 'coverage run --debug=sys manage.py test --noinput --parallel=1 -v 3'
+
+    - echo "=== Post-test Resources ==="
+    - docker stats --no-stream || true
+    - free -m
+
+    - echo "=== Generating Coverage Report ==="
+    - docker compose exec -T web coverage report --fail-under=80
+    - docker compose exec -T web coverage xml
     - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
+
   artifacts:
     paths:
       - coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
     expire_in: 1 week
 
 after_script:
+  - echo "=== Cleanup Phase ==="
+  - echo "Current container state:"
+  - docker ps -a
+  - echo "Resource usage before cleanup:"
+  - free -m
   - docker compose -f docker-compose.yml -f docker-compose.override.yml down -v
+  - docker system prune -af
+  - docker volume prune -f
+  - echo "=== Final System Resources ==="
+  - free -m
