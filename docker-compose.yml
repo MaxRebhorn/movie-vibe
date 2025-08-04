@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
   db:
     image: postgres:15
     container_name: django_postgres
@@ -20,6 +19,7 @@ services:
       interval: 5s
       timeout: 2s
       retries: 10
+
   vektor:
     environment:
       - QDRANT_HOST=vektor
@@ -33,8 +33,6 @@ services:
     networks:
       - django_network
 
-
-  # Elasticsearch
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
     container_name: django_elasticsearch
@@ -60,8 +58,6 @@ services:
       timeout: 2s
       retries: 10
 
-
-  # Django Backend
   web:
     build:
       context: .
