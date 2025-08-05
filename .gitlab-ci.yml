@@ -27,10 +27,11 @@ cache:
   paths:
     - /cache/pip
     - /cache/docker
+    - /cache/transformers
   policy: pull-push
 
 before_script:
-  - mkdir -p /cache/pip /cache/docker
+  - mkdir -p /cache/pip /cache/docker /cache/transformers
   - docker info
   - docker compose version
 
@@ -63,8 +64,7 @@ test:
     paths:
       - coverage_html/
       - coverage.xml
-    reports:
-      cobertura: coverage.xml
+      - coverage.txt
     expire_in: 1 week
   cache:
     paths:
