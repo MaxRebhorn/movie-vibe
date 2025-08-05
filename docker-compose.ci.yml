@@ -4,7 +4,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.ci  # Use custom Dockerfile name explicitly
+      dockerfile: docker/Dockerfile.ci  # Use custom Dockerfile name explicitly
     volumes:
       - .:/app
       - /cache/pip:/root/.cache/pip   # Mount pip cache
