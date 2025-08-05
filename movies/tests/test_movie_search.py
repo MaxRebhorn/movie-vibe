@@ -5,7 +5,7 @@ from rest_framework import status
 from movies.models import Movie
 
 
-class MovieEmbeddingTests(TestCase):
+class MovieSearchTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.movie_1 = Movie.objects.create(
@@ -49,7 +49,7 @@ class MovieEmbeddingTests(TestCase):
         )
 
     def setUp(self):
-        # Patch MovieSearchService.search
+        # Patch the MovieSearchService.search method
         self.search_patcher = patch('movies.services.movie_search.MovieSearchService.search')
         self.mock_search_method = self.search_patcher.start()
 
@@ -60,10 +60,9 @@ class MovieEmbeddingTests(TestCase):
         mock_hit_2 = MagicMock()
         mock_hit_2.meta.id = str(self.movie_2.id)
 
-        # Configure .execute() to return the mock hits
+        # Simulate .execute() returning mock hits
         mock_search_response = MagicMock()
         mock_search_response.execute.return_value = [mock_hit_1, mock_hit_2]
-
         self.mock_search_method.return_value = mock_search_response
 
     def tearDown(self):
@@ -84,11 +83,12 @@ class MovieEmbeddingTests(TestCase):
     def test_empty_query_returns_empty_list(self):
         url = reverse('movie_search')
         response = self.client.get(url, {'q': ''})
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.json()), 0)  # View returns empty list on empty query
+        self.assertEqual(response.json(), [])
 
     def test_search_with_no_results(self):
-        # Configure mock to return no results
+        # Return empty list for execute
         self.mock_search_method.return_value.execute.return_value = []
 
         url = reverse('movie_search')
