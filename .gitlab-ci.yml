@@ -6,6 +6,10 @@ variables:
   POSTGRES_PASSWORD: "postgres"
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
+  DOCKER_TLS_CERTDIR: ""  # Disable TLS for Docker-in-Docker for faster performance
+  DOCKER_BUILDKIT: 1      # Enable BuildKit for faster builds
+  COMPOSE_DOCKER_CLI_BUILD: 1  # Use Docker CLI for builds in compose
+  PIP_CACHE_DIR: ".cache/pip"
 
 services:
   - docker:20.10.24-dind
@@ -13,12 +17,14 @@ services:
 stages:
   - build
   - test
+  - security
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .cache/pip
     - venv/
+  policy: pull-push  # Optimize cache behavior
 
 before_script:
   - docker info
@@ -27,7 +33,9 @@ before_script:
 build:
   stage: build
   script:
-    - docker compose build
+    - docker compose build --parallel  # Build containers in parallel
+  cache:
+    policy: pull  # Only pull cache for build stage
 
 test:
   stage: test
@@ -35,8 +43,9 @@ test:
     - docker compose up -d --wait
     - docker compose run --rm web bash -c "
         set -euxo pipefail
-        pip install coverage --cache-dir=.cache/pip --root-user-action=ignore
-        coverage run manage.py test --noinput
+        pip install -r requirements.txt --cache-dir=$PIP_CACHE_DIR --root-user-action=ignore
+        coverage run manage.py test --noinput --parallel=4  # Run tests in parallel
+        coverage combine
         coverage report --fail-under=80 > coverage.txt || true
         cat coverage.txt
         coverage xml
@@ -50,3 +59,17 @@ test:
       - coverage.txt
       - coverage.xml
     expire_in: 1 week
+  cache:
+    policy: push  # Only push cache for test stage
+
+bandit:
+  stage: security
+  image: python:3.11
+  script:
+    - pip install bandit
+    - bandit -r . -f html -o bandit.html || true  # Continue even if issues found
+  artifacts:
+    paths:
+      - bandit.html
+    expire_in: 1 week
+  allow_failure: true  # Don't fail pipeline for security findings
