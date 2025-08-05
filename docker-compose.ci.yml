@@ -2,11 +2,13 @@ version: '3.8'
 
 services:
   web:
-    profiles: ["ci"]
     build:
+      context: .
+      dockerfile: Dockerfile
+      cache_to:
+        - type=local,dest=/cache/docker
       cache_from:
-        - ${CI_REGISTRY_IMAGE}/web:${CI_COMMIT_REF_SLUG}
-      cache_to: type=local,dest=/cache/docker,mode=max
+        - type=local,src=/cache/docker
     environment:
       DEBUG: "0"
       TRANSFORMERS_CACHE: "/cache/transformers"
