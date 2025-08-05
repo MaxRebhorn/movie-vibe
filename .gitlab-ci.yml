@@ -6,10 +6,12 @@ variables:
   POSTGRES_PASSWORD: "postgres"
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
-  DOCKER_TLS_CERTDIR: ""  # Disable TLS for Docker-in-Docker
-  DOCKER_BUILDKIT: 1      # Enable BuildKit for faster builds
-  COMPOSE_DOCKER_CLI_BUILD: 1  # Use Docker CLI for builds in compose
-  PIP_CACHE_DIR: ".cache/pip"
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+  PIP_CACHE_DIR: "/cache/pip"
+  COMPOSE_PROFILES: "ci"
+  COMPOSE_FILE: "docker-compose.yml:docker-compose.ci.yml"
 
 services:
   - docker:20.10.24-dind
@@ -18,63 +20,98 @@ stages:
   - build
   - test
   - security
+  - lint
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - .cache/pip
-    - venv/
+    - /cache/pip
+    - /cache/docker
   policy: pull-push
 
 before_script:
+  - mkdir -p /cache/pip /cache/docker
   - docker info
   - docker compose version
 
 build:
   stage: build
   script:
-    - docker compose build --parallel
+    - docker compose build --parallel --progress plain --build-arg BUILDKIT_INLINE_CACHE=1
   cache:
-    policy: pull
+    key: docker-cache-${CI_COMMIT_REF_SLUG}
+    paths:
+      - /cache/docker
+    policy: pull-push
 
 test:
   stage: test
+  needs: ["build"]
   script:
-    - docker compose up -d --wait
+    - docker compose up -d --wait db elasticsearch
     - >
       docker compose run --rm web bash -c "
-      set -euxo pipefail
-      pip install -r requirements.txt --cache-dir=$PIP_CACHE_DIR --root-user-action=ignore
-      coverage run manage.py test --noinput --parallel=4
+      coverage run --parallel-mode manage.py test --noinput --parallel=$(nproc)
       coverage combine
-      coverage report --fail-under=80 > coverage.txt || true
-      cat coverage.txt
+      coverage report --fail-under=80
       coverage xml
       coverage html -d coverage_html
       "
-    - docker compose down
+    - docker compose down -v
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
   artifacts:
     paths:
       - coverage_html/
-      - coverage.txt
       - coverage.xml
+    reports:
+      cobertura: coverage.xml
     expire_in: 1 week
   cache:
-    policy: push
+    paths:
+      - /cache/pip
+    policy: pull
 
 bandit:
   stage: security
+  needs: ["build"]
   script:
-    - docker compose up -d db elasticsearch  # Start only dependencies
-    - >
-      docker compose run --rm web bash -c "
-      pip install -r requirements.txt --cache-dir=$PIP_CACHE_DIR --root-user-action=ignore
-      bandit -r . -f html -o bandit.html || true
-      "
-    - docker compose down
+    - docker compose run --no-deps --rm web bandit -r . -f html -o bandit.html
   artifacts:
     paths:
       - bandit.html
     expire_in: 1 week
   allow_failure: true
+  cache:
+    paths:
+      - /cache/pip
+    policy: pull
+
+flake8:
+  stage: lint
+  needs: ["build"]
+  script:
+    - docker compose run --no-deps --rm web flake8 . --exit-zero > flake8.txt
+  artifacts:
+    paths:
+      - flake8.txt
+    expire_in: 1 week
+  allow_failure: true
+  cache:
+    paths:
+      - /cache/pip
+    policy: pull
+
+mypy:
+  stage: lint
+  needs: ["build"]
+  script:
+    - docker compose run --no-deps --rm web mypy . --html-report mypy_report
+  artifacts:
+    paths:
+      - mypy_report/
+    expire_in: 1 week
+  allow_failure: true
+  cache:
+    paths:
+      - /cache/pip
+    policy: pull

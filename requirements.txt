@@ -1,3 +1,4 @@
+# Existing dependencies
 Django==4.2.7
 psycopg2-binary==2.9.7
 django-cors-headers==4.3.1
@@ -12,4 +13,10 @@ sentence-transformers>=2.2.2
 qdrant-client==1.7.0
 elasticsearch<8
 django-elasticsearch-dsl<8
-bandit==1.7.7  # Added for security scanning
+bandit==1.7.7
+
+# New analysis tools
+flake8==7.0.0
+mypy==1.10.0
+django-stubs==4.2.7
+types-requests==2.31.0.20240406
