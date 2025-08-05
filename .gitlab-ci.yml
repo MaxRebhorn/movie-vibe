@@ -41,15 +41,16 @@ test:
   stage: test
   script:
     - docker compose up -d --wait
-    - docker compose run --rm web bash -c "
-        set -euxo pipefail
-        pip install -r requirements.txt --cache-dir=$PIP_CACHE_DIR --root-user-action=ignore
-        coverage run manage.py test --noinput --parallel=4  # Run tests in parallel
-        coverage combine
-        coverage report --fail-under=80 > coverage.txt || true
-        cat coverage.txt
-        coverage xml
-        coverage html -d coverage_html
+    - >
+      docker compose run --rm web bash -c "
+      set -euxo pipefail
+      pip install -r requirements.txt --cache-dir=$PIP_CACHE_DIR --root-user-action=ignore
+      coverage run manage.py test --noinput --parallel=4  # Run tests in parallel
+      coverage combine
+      coverage report --fail-under=80 > coverage.txt || true
+      cat coverage.txt
+      coverage xml
+      coverage html -d coverage_html
       "
     - docker compose down
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
