@@ -49,16 +49,14 @@ test:
   stage: test
   needs: ["build"]
   script:
-    - docker compose up -d --wait db elasticsearch
-    - >
-      docker compose run --rm web bash -c "
-      coverage run --parallel-mode manage.py test --noinput --parallel=$(nproc)
-      coverage combine
-      coverage report --fail-under=80
-      coverage xml
-      coverage html -d coverage_html
-      "
-    - docker compose down -v
+  - |
+    docker compose run --rm web bash -c "
+    coverage run --parallel-mode manage.py test --noinput --parallel=$(nproc)
+    coverage combine
+    coverage report --fail-under=80
+    coverage xml
+    coverage html -d coverage_html
+    "
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
   artifacts:
     paths:
