@@ -5,10 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      cache_to:
-        - type=local,dest=/cache/docker
-      cache_from:
-        - type=local,src=/cache/docker
     environment:
       DEBUG: "0"
       TRANSFORMERS_CACHE: "/cache/transformers"
