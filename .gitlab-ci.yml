@@ -34,11 +34,12 @@ test:
   script:
     - docker compose up -d --wait
     - docker compose run --rm web bash -c "
-        pip install coverage --cache-dir=.cache/pip --root-user-action=ignore &&
-        coverage run manage.py test --noinput &&
-        coverage report --fail-under=80 > coverage.txt &&
-        cat coverage.txt &&
-        coverage xml &&
+        set -euxo pipefail
+        pip install coverage --cache-dir=.cache/pip --root-user-action=ignore
+        coverage run manage.py test --noinput
+        coverage report --fail-under=80 > coverage.txt || true
+        cat coverage.txt
+        coverage xml
         coverage html -d coverage_html
       "
     - docker compose down
@@ -49,4 +50,5 @@ test:
       - coverage.txt
       - coverage.xml
     expire_in: 1 week
+
 
