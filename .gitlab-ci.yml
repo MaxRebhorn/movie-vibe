@@ -6,11 +6,14 @@ variables:
   POSTGRES_PASSWORD: "postgres"
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_BUILDKIT: 1
 
 services:
   - docker:20.10.24-dind
 
 stages:
+  - lint
   - build
   - test
 
@@ -18,24 +21,54 @@ cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .cache/pip
-    - venv/
 
 before_script:
+  - apk add --no-cache curl  # Needed for wait-for-it or healthchecks
   - docker info
   - docker compose version
 
+# --------------------------------
+# LINT stage (quick feedback)
+# --------------------------------
+lint:
+  stage: lint
+  script:
+    - docker compose run --rm web flake8 .
+  rules:
+    - changes:
+        - "**/*.py"
+        - ".flake8"
+    - exists:
+        - docker-compose.yml
+
+# --------------------------------
+# BUILD stage (only when Dockerfile or deps change)
+# --------------------------------
 build:
   stage: build
+  rules:
+    - changes:
+        - docker/Dockerfile
+        - requirements.txt
+        - setup.py
+    - exists:
+        - docker-compose.yml
   script:
     - docker compose build
 
+# --------------------------------
+# TEST stage (unit + coverage)
+# --------------------------------
 test:
   stage: test
   script:
     - docker compose up -d --wait
+    - docker compose ps  # for debugging
     - docker compose run --rm web bash -c "
         set -euxo pipefail
         pip install coverage --cache-dir=.cache/pip --root-user-action=ignore
+        ./wait-for-it.sh db:5432 -t 30
+        ./wait-for-it.sh elasticsearch:9200 -t 30
         coverage run manage.py test --noinput
         coverage report --fail-under=80 > coverage.txt || true
         cat coverage.txt
@@ -50,3 +83,6 @@ test:
       - coverage.txt
       - coverage.xml
     expire_in: 1 week
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
