@@ -1,27 +1,37 @@
-version: '3.8'
+version: "3.9"
 
 services:
   web:
     build:
       context: .
-      dockerfile: docker/Dockerfile
-    environment:
-      DEBUG: "0"
-      TRANSFORMERS_CACHE: "/cache/transformers"
-      SENTENCE_TRANSFORMERS_HOME: "/cache/transformers"
+      dockerfile: Dockerfile.ci  # Use custom Dockerfile name explicitly
     volumes:
-      - /cache:/cache
+      - .:/app
+      - /cache/pip:/root/.cache/pip   # Mount pip cache
+    environment:
+      - ELASTICSEARCH_DSL_HOSTS=${ELASTICSEARCH_DSL_HOSTS}
+    depends_on:
+      - db
+      - elasticsearch
 
   db:
-    profiles: ["ci"]
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
   elasticsearch:
-    profiles: ["ci"]
-
-  vektor:
-    profiles: ["!ci"]
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
 
 volumes:
-  postgres_data:
-  es_data:
-  model_cache:
+  pgdata:
