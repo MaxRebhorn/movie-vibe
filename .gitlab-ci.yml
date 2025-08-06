@@ -1,10 +1,4 @@
-stages:
-  - build
-  - test
-  - security
-  - lint
-
-# ✅ Global environment variables (move out of `default`)
+# ✅ Global environment variables
 variables:
   PYTHONDONTWRITEBYTECODE: "1"
   PYTHONUNBUFFERED: "1"
@@ -20,11 +14,8 @@ variables:
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
 
 default:
-  image: python:3.10-slim
-  before_script:
-    - python -m pip install --upgrade pip
-    - pip install -r requirements.txt
-    - pip install -r requirements-test.txt
+  image: dockerhub.cloud.queo.org/queo.web/azubi/movie-vibe:ci-image
+  before_script: []
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -33,7 +24,7 @@ default:
       - .cache/huggingface
       - .cache/sentence_transformers
 
-# BUILD (docker image for local use, optional)
+# ✅ BUILD (only stage still using docker image directly)
 build:
   stage: build
   image: docker:20.10.24
@@ -50,17 +41,16 @@ build:
     - main
     - dev
 
-# TEST
+# ✅ TEST
 test:
   stage: test
-  image: docker:20.10.24
   services:
     - docker:20.10.24-dind
+  image: dockerhub.cloud.queo.org/queo.web/azubi/movie-vibe:ci-image
   script:
     - docker compose up -d --wait
     - docker compose exec web python manage.py migrate
     - docker compose exec web python manage.py createcachetable
-    - docker compose exec web pip install coverage --root-user-action=ignore
     - docker compose exec web coverage run manage.py test --noinput
     - docker compose exec web coverage report --fail-under=80
     - docker compose exec web coverage xml
@@ -72,7 +62,7 @@ test:
   after_script:
     - docker compose down
 
-# SECURITY (Bandit)
+# ✅ SECURITY (Bandit)
 security:
   stage: security
   script:
@@ -85,7 +75,7 @@ security:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-# LINT (flake8 + mypy)
+# ✅ LINT (flake8 + mypy)
 lint:
   stage: lint
   script:

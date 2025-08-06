@@ -1,23 +1,31 @@
+# Dockerfile.ci
 FROM python:3.10-slim
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Set Python environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=off \
+    TRANSFORMERS_CACHE=/cache/transformers \
+    TORCH_HOME=/cache/torch \
+    SENTENCE_TRANSFORMERS_HOME=/cache/sentence_transformers
 
+# Set working directory
 WORKDIR /app
 
-COPY requirements.txt .
-COPY requirements-test.txt .
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y gcc libpq-dev curl && \
-    pip install --upgrade pip && \
-    pip install -r requirements.txt && \
-    pip install -r requirements-test.txt && \
-    rm -rf /var/lib/apt/lists/*
+# Copy and install Python dependencies first for layer caching
+COPY requirements.txt requirements-test.txt ./
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt -r requirements-test.txt
 
+# Copy application code
 COPY . .
 
-ENV TRANSFORMERS_CACHE=/cache/transformers
-ENV TORCH_HOME=/cache/torch
-ENV SENTENCE_TRANSFORMERS_HOME=/cache/sentence_transformers
-
-ENTRYPOINT ["python"]
+# Create cache directories
+RUN mkdir -p /cache/transformers /cache/torch /cache/sentence_transformers
