@@ -1,4 +1,11 @@
-# ✅ Global environment variables
+
+stages:
+  - build
+  - test
+  - security
+  - lint
+  - deploy
+
 variables:
   PYTHONDONTWRITEBYTECODE: "1"
   PYTHONUNBUFFERED: "1"
