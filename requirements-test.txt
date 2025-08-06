@@ -1,0 +1,14 @@
+# Testing & dev tools
+coverage>=7.4,<8.0
+pytest
+pytest-django
+pytest-cov
+pytest-mock
+requests-mock
+mock
+factory-boy
+freezegun
+flake8==7.0.0
+mypy==1.10.0
+django-stubs==4.2.7
+bandit==1.7.7

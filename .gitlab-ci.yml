@@ -1,115 +1,92 @@
-image: docker:20.10.24
-
-variables:
-  POSTGRES_DB: "test_db"
-  POSTGRES_USER: "postgres"
-  POSTGRES_PASSWORD: "postgres"
-  PYTHON_VERSION: "3.11"
-  ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_BUILDKIT: 1
-  COMPOSE_DOCKER_CLI_BUILD: 1
-  PIP_CACHE_DIR: "/cache/pip"
-  COMPOSE_PROFILES: "ci"
-  COMPOSE_FILE: "docker-compose.yml:docker-compose.ci.yml"
-
-services:
-  - docker:20.10.24-dind
-
 stages:
   - build
   - test
   - security
   - lint
 
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - /cache/pip
-    - /cache/docker
-    - /cache/transformers
-  policy: pull-push
+default:
+  image: python:3.10-slim
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pip install -r requirements-test.txt
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .cache/pip
+      - .cache/torch
+      - .cache/huggingface
+      - .cache/sentence_transformers
+  variables:
+    TRANSFORMERS_CACHE: ".cache/transformers"
+    TORCH_HOME: ".cache/torch"
+    SENTENCE_TRANSFORMERS_HOME: ".cache/sentence_transformers"
+    PYTHONPATH: "$CI_PROJECT_DIR"
+    DJANGO_SETTINGS_MODULE: django_backend.settings
 
-before_script:
-  - mkdir -p /cache/pip /cache/docker /cache/transformers
-  - docker info
-  - docker compose version
-
+# BUILD (docker image for local use, optional)
 build:
   stage: build
+  image: docker:20.10.24
+  services:
+    - docker:20.10.24-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_BUILDKIT: 1
   script:
-    - docker compose build --parallel --progress plain --build-arg BUILDKIT_INLINE_CACHE=1
-  cache:
-    key: docker-cache-${CI_COMMIT_REF_SLUG}
-    paths:
-      - /cache/docker
-    policy: pull-push
+    - docker compose -f docker-compose.ci.yml build
+  only:
+    - merge_requests
+    - main
+    - dev
 
+# TEST
 test:
   stage: test
-  needs: ["build"]
+  services:
+    - postgres:14
+    - docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+  variables:
+    POSTGRES_DB: test_db
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    ELASTICSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
   script:
-  - |
-    docker compose run --rm web bash -c "
-    coverage run --parallel-mode manage.py test --noinput --parallel=$(nproc)
-    coverage combine
-    coverage report --fail-under=80
-    coverage xml
-    coverage html -d coverage_html
-    "
-  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
+    - coverage run manage.py test
+    - coverage report --fail-under=80
+    - coverage xml
+    - coverage html
   artifacts:
+    when: on_failure
     paths:
-      - coverage_html/
+      - htmlcov/
       - coverage.xml
-      - coverage.txt
     expire_in: 1 week
-  cache:
-    paths:
-      - /cache/pip
-    policy: pull
 
-bandit:
+# SECURITY (Bandit)
+security:
   stage: security
-  needs: ["build"]
   script:
-    - docker compose run --no-deps --rm web bandit -r . -f html -o bandit.html
+    - bandit -r movies review tags tmdb user django_backend -f html -o bandit-report.html
+  allow_failure: true
   artifacts:
     paths:
-      - bandit.html
+      - bandit-report.html
     expire_in: 1 week
-  allow_failure: true
-  cache:
-    paths:
-      - /cache/pip
-    policy: pull
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-flake8:
+# LINT (flake8 + mypy)
+lint:
   stage: lint
-  needs: ["build"]
   script:
-    - docker compose run --no-deps --rm web flake8 . --exit-zero > flake8.txt
+    - flake8 movies review tags tmdb user django_backend > flake8.txt || true
+    - mypy movies review tags tmdb user django_backend --config-file mypy.ini || true
+  allow_failure: true
   artifacts:
     paths:
       - flake8.txt
     expire_in: 1 week
-  allow_failure: true
-  cache:
-    paths:
-      - /cache/pip
-    policy: pull
-
-mypy:
-  stage: lint
-  needs: ["build"]
-  script:
-    - docker compose run --no-deps --rm web mypy . --html-report mypy_report
-  artifacts:
-    paths:
-      - mypy_report/
-    expire_in: 1 week
-  allow_failure: true
-  cache:
-    paths:
-      - /cache/pip
-    policy: pull
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

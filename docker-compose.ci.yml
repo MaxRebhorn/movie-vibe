@@ -1,37 +1,29 @@
 version: "3.9"
-
 services:
   web:
     build:
       context: .
-      dockerfile: docker/Dockerfile.ci  # Use custom Dockerfile name explicitly
+      dockerfile: docker/Dockerfile.ci
     volumes:
       - .:/app
-      - /cache/pip:/root/.cache/pip   # Mount pip cache
+      - .cache/pip:/root/.cache/pip
     environment:
-      - ELASTICSEARCH_DSL_HOSTS=${ELASTICSEARCH_DSL_HOSTS}
-    depends_on:
-      - db
-      - elasticsearch
+      - DEBUG=0
+      - DJANGO_SETTINGS_MODULE=django_backend.settings
+      - TRANSFORMERS_CACHE=/cache/transformers
+      - TORCH_HOME=/cache/torch
+      - SENTENCE_TRANSFORMERS_HOME=/cache/sentence_transformers
+    command: ["python", "manage.py", "test"]
 
-  db:
-    image: postgres:15
+  postgres:
+    image: postgres:14
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+      POSTGRES_DB: test_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
     environment:
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-
-volumes:
-  pgdata:
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m

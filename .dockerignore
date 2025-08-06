@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.log
+.env
+.venv/
+venv/
+.dockerignore
+.git
+.gitignore
+htmlcov/
+.coverage
+.cache/
+*.sqlite3
+*.db
