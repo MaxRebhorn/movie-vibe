@@ -4,6 +4,21 @@ stages:
   - security
   - lint
 
+# ✅ Global environment variables (move out of `default`)
+variables:
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+  TRANSFORMERS_CACHE: ".cache/transformers"
+  TORCH_HOME: ".cache/torch"
+  SENTENCE_TRANSFORMERS_HOME: ".cache/sentence_transformers"
+  PYTHONPATH: "$CI_PROJECT_DIR"
+  DJANGO_SETTINGS_MODULE: django_backend.settings
+  POSTGRES_DB: "test_db"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  PYTHON_VERSION: "3.11"
+  ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
+
 default:
   image: python:3.10-slim
   before_script:
@@ -17,12 +32,6 @@ default:
       - .cache/torch
       - .cache/huggingface
       - .cache/sentence_transformers
-  variables:
-    TRANSFORMERS_CACHE: ".cache/transformers"
-    TORCH_HOME: ".cache/torch"
-    SENTENCE_TRANSFORMERS_HOME: ".cache/sentence_transformers"
-    PYTHONPATH: "$CI_PROJECT_DIR"
-    DJANGO_SETTINGS_MODULE: django_backend.settings
 
 # BUILD (docker image for local use, optional)
 build:
@@ -48,9 +57,6 @@ test:
     - postgres:14
     - docker.elastic.co/elasticsearch/elasticsearch:8.10.2
   variables:
-    POSTGRES_DB: test_db
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: postgres
     ELASTICSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
   script:
     - coverage run manage.py test
