@@ -1,10 +1,8 @@
-
 stages:
   - build
   - test
-  - security
   - lint
-  - deploy
+  - security
 
 variables:
   PYTHONDONTWRITEBYTECODE: "1"
@@ -22,7 +20,6 @@ variables:
 
 default:
   image: dockerhub.cloud.queo.org/queo.web/azubi/movie-vibe:ci-image
-  before_script: []
   cache:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
@@ -31,8 +28,10 @@ default:
       - .cache/huggingface
       - .cache/sentence_transformers
 
-# ✅ BUILD (only stage still using docker image directly)
-build:
+##########################
+# BUILD
+##########################
+build-image:
   stage: build
   image: docker:20.10.24
   services:
@@ -44,16 +43,18 @@ build:
   script:
     - docker compose -f docker-compose.ci.yml build
   only:
-    - merge_requests
-    - main
-    - dev
+    refs:
+      - merge_requests
+      - main
+      - dev
 
-# ✅ TEST
-test:
+##########################
+# TEST
+##########################
+unit-test:
   stage: test
   services:
     - docker:20.10.24-dind
-  image: dockerhub.cloud.queo.org/queo.web/azubi/movie-vibe:ci-image
   script:
     - docker compose up -d --wait
     - docker compose exec web python manage.py migrate
@@ -68,22 +69,13 @@ test:
     expire_in: 1 week
   after_script:
     - docker compose down
+  needs:
+    - build-image
 
-# ✅ SECURITY (Bandit)
-security:
-  stage: security
-  script:
-    - bandit -r movies review tags tmdb user django_backend -f html -o bandit-report.html
-  allow_failure: true
-  artifacts:
-    paths:
-      - bandit-report.html
-    expire_in: 1 week
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
-# ✅ LINT (flake8 + mypy)
-lint:
+##########################
+# LINT (non-blocking)
+##########################
+lint-code:
   stage: lint
   script:
     - flake8 movies review tags tmdb user django_backend > flake8.txt || true
@@ -95,3 +87,22 @@ lint:
     expire_in: 1 week
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  needs:
+    - build-image
+
+##########################
+# SECURITY (non-blocking)
+##########################
+security-scan:
+  stage: security
+  script:
+    - bandit -r movies review tags tmdb user django_backend -f html -o bandit-report.html || true
+  allow_failure: true
+  artifacts:
+    paths:
+      - bandit-report.html
+    expire_in: 1 week
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  needs:
+    - build-image
