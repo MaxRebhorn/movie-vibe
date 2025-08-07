@@ -59,6 +59,7 @@ services:
       retries: 20
 
   web:
+    image: movie-vibe-test:latest
     build:
       context: .
       dockerfile: docker/Dockerfile
