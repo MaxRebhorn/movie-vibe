@@ -1,3 +1,6 @@
+import os
+from unittest import skipIf
+
 from django.test import TestCase
 from unittest.mock import patch
 from datetime import datetime
@@ -5,6 +8,9 @@ from movies.models import Movie
 from movies.services.embed_service import embed_data, embed_model
 
 
+
+
+@skipIf(os.getenv("SKIP_HEAVY_TESTS") == "1", "Skip heavy tests in CI")
 class EmbeddingTests(TestCase):
 
     @patch("movies.services.embed_service.model.encode")

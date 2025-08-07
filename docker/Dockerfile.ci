@@ -1,7 +1,6 @@
 # Dockerfile.ci
 FROM python:3.10-slim
 
-# Set Python environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=off \
@@ -9,10 +8,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     TORCH_HOME=/cache/torch \
     SENTENCE_TRANSFORMERS_HOME=/cache/sentence_transformers
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies, Docker CLI, Docker Compose plugin, and cleanup cache
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
@@ -24,13 +21,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
          -o /usr/local/lib/docker/cli-plugins/docker-compose \
     && chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
-# Copy and install Python dependencies first for layer caching
-COPY requirements.txt requirements-test.txt ./
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt -r requirements-test.txt
+COPY requirements-test.txt ./
 
-# Copy application code
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements-test.txt
+
 COPY . .
 
-# Create cache directories
 RUN mkdir -p /cache/transformers /cache/torch /cache/sentence_transformers

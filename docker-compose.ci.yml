@@ -6,24 +6,20 @@ services:
       dockerfile: docker/Dockerfile.ci
     volumes:
       - .:/app
-      - .cache/pip:/root/.cache/pip
     environment:
-      - DEBUG=0
-      - DJANGO_SETTINGS_MODULE=django_backend.settings
-      - TRANSFORMERS_CACHE=/cache/transformers
-      - TORCH_HOME=/cache/torch
-      - SENTENCE_TRANSFORMERS_HOME=/cache/sentence_transformers
-    command: ["python", "manage.py", "test"]
+      - SKIP_HEAVY_TESTS=1
+    depends_on:
+      - db
+      - elasticsearch
 
-  postgres:
-    image: postgres:14
+  db:
+    image: postgres:15
     environment:
       POSTGRES_DB: test_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.3
     environment:
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m

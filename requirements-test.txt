@@ -1,3 +1,27 @@
+
+Django==4.2.7
+psycopg2-binary==2.9.7
+django-cors-headers==4.3.1
+djangorestframework==3.14.0
+python-dotenv==1.0.0
+requests==2.31.0
+coverage>=7.4,<8.0
+rapidfuzz==3.5.2
+tmdbv3api==1.9.0
+wikipedia==1.4.0
+qdrant-client==1.7.0
+elasticsearch<8
+django-elasticsearch-dsl<8
+bandit==1.7.7
+
+# New analysis tools
+flake8==7.0.0
+mypy==1.10.0
+django-stubs==4.2.7
+
+
+
+
 # Testing & dev tools
 coverage>=7.4,<8.0
 pytest
