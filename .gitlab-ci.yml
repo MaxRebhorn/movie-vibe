@@ -13,6 +13,7 @@ variables:
   SKIP_HEAVY_TESTS: "1"
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
+  DOCKER_TLS_CERTDIR: ""
 
 stages:
   - build
