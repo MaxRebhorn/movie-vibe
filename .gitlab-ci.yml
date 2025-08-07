@@ -36,8 +36,6 @@ test:
   services:
     - name: postgres:14
       alias: db
-    - name: elasticsearch:7.17.6
-      alias: elasticsearch
   variables:
     POSTGRES_HOST: db
   script:
