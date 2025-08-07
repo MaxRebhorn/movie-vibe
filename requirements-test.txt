@@ -9,7 +9,7 @@ coverage>=7.4,<8.0
 rapidfuzz==3.5.2
 tmdbv3api==1.9.0
 wikipedia==1.4.0
-qdrant-client==1.7.0
+qdrant-client[grpc]==1.7.0
 elasticsearch<8
 django-elasticsearch-dsl<8
 
