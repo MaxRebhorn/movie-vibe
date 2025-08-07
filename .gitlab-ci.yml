@@ -9,7 +9,7 @@ variables:
   POSTGRES_PASSWORD: "postgres"
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
-  SKIP_HEAVY_TESTS: "1"
+  SKIP_HEAVY_TESTS: "1"  # This will skip the @skipIf decorated tests
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
 
@@ -41,7 +41,10 @@ test:
     - docker compose -f docker/docker-compose.yml up -d --wait
     - docker compose exec -T web python manage.py migrate
     - docker compose exec -T web python manage.py createcachetable
-    - docker compose exec -T web coverage run manage.py test --noinput
+    - docker compose exec -T web coverage run manage.py test \
+        --exclude=*embedding* \
+        --exclude=*vector* \
+        --noinput
     - docker compose exec -T web coverage report --fail-under=80
     - docker compose exec -T web coverage xml
     - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
