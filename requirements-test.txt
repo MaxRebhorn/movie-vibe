@@ -14,14 +14,15 @@ elasticsearch<8
 django-elasticsearch-dsl<8
 
 # Testing tools
-pytest
-pytest-django
-pytest-cov
-pytest-mock
-requests-mock
-mock
-factory-boy
-freezegun
+pytest==8.2.1
+pytest-django==4.8.0
+pytest-cov==5.0.0
+pytest-mock==3.14.0
+requests-mock==1.11.0
+mock==5.1.0
+factory-boy==3.3.0
+freezegun==1.4.0
+
 
 # Analysis tools
 flake8==7.0.0
