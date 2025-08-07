@@ -14,12 +14,11 @@ variables:
   POSTGRES_HOST: db
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
-  SKIP_HEAVY_TESTS: "1"
+  SKIP_HEAVY_TESTS: "1"  # Set globally here (can be overridden per job)
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
   API_KEY: "dummy-key"
   REQUIREMENTS: requirements-test.txt
-
 stages:
   - build
   - test
@@ -38,8 +37,7 @@ before_script:
 build:
   stage: build
   script:
-    - docker compose build --build-arg REQUIREMENTS=${REQUIREMENTS}
-    - docker tag ${CI_PROJECT_NAME}_web:latest movie-vibe-test:latest
+    - docker compose build --build-arg REQUIREMENTS=requirements-test.txt
 
 test:
   stage: test
@@ -48,7 +46,7 @@ test:
     - docker compose up -d --wait
     - |
       echo "Waiting for Elasticsearch..."
-      for i in $(seq 1 30); do
+      for i in {1..30}; do
         if curl -s http://localhost:9200/_cluster/health | grep -q '"status":"green"\|"status":"yellow"'; then
           echo "Elasticsearch ready!"
           break
@@ -58,16 +56,19 @@ test:
     - docker compose exec -T web python manage.py migrate
     - docker compose exec -T web python manage.py createcachetable
 
-    # Run static analysis here inside the same container
-    - docker compose exec -T web /bin/sh -c "
-        pip install --quiet bandit flake8 flake8-django coverage --cache-dir=.cache/pip --root-user-action=ignore && \
-        bandit -r . -x venv,tests,migrations -o bandit_report.txt -f txt || true && \
-        flake8 . --exclude=venv,migrations --format=html --htmldir=flake8_report || true
-      "
-
     # Run tests with coverage
-    - docker compose exec -T web bash -c "
+    - |
+      docker compose exec -T web bash -c "
         set -euxo pipefail
+        pip install coverage flake8 bandit --cache-dir=.cache/pip --root-user-action=ignore
+        echo 'Running flake8...'
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+        echo 'Running bandit...'
+        bandit -r . -x venv -ll -iii -o bandit_report.txt || true
+
+        echo 'Running Django tests with coverage...'
         coverage run manage.py test \
           --exclude='*embedding*' \
           --exclude='*vector*' \
@@ -77,14 +78,15 @@ test:
         coverage xml
         coverage html -d coverage_html
       "
+
     - docker compose down --volumes --remove-orphans
 
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
   artifacts:
     paths:
-      - bandit_report.txt
-      - flake8_report/
       - coverage_html/
       - coverage.txt
       - coverage.xml
+      - bandit_report.txt
     expire_in: 1 week
+
