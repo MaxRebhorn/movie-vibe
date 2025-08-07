@@ -37,6 +37,7 @@ test:
   variables:
     POSTGRES_HOST: db
   script:
+    - docker compose -f docker/docker-compose.yml build --build-arg REQUIREMENTS=requirements-test.txt
     - docker compose -f docker/docker-compose.yml up -d --wait
     - docker compose exec -T web python manage.py migrate
     - docker compose exec -T web python manage.py createcachetable
