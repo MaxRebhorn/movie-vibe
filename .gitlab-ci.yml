@@ -22,32 +22,23 @@ before_script:
 build:
   stage: build
   script:
-    # Build the test image using Dockerfile.ci (with heavy test deps)
-   - docker build -f docker/Dockerfile.ci -t movie-vibe-test:latest .
+    # Build image using the test requirements
+    - docker build --build-arg REQUIREMENTS=requirements-test.txt -t movie-vibe-test:latest .
   artifacts:
     expire_in: 1 hour
     paths:
-      # Cache the image layers (optional)
       - .docker
 
 test:
   stage: test
   script:
-    # Start services using docker-compose (make sure it uses the test image)
     - docker compose up -d --wait
-
-    # Run migrations and cache setup
     - docker compose exec web python manage.py migrate
     - docker compose exec web python manage.py createcachetable
-
-    # Run tests with coverage inside the container with test deps pre-installed
     - docker compose exec web coverage run manage.py test --noinput
     - docker compose exec web coverage report --fail-under=80
     - docker compose exec web coverage xml
-
-    # Copy coverage report out of the container
     - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
-
   artifacts:
     paths:
       - coverage.xml

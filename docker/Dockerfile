@@ -1,6 +1,8 @@
 # Stage 1: Builder with BuildKit caching
 FROM python:3.11-slim as builder
 
+ARG REQUIREMENTS=requirements.txt
+
 # Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -10,10 +12,13 @@ RUN apt-get update && \
 
 WORKDIR /app
 
+# Copy both requirements files (only one will be used)
+COPY requirements.txt requirements.txt
+COPY requirements-test.txt requirements-test.txt
+
 # Install Python dependencies with BuildKit cache
-COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --user --no-cache-dir -r requirements.txt
+    pip install --user --no-cache-dir -r $REQUIREMENTS
 
 # Pre-download models for faster startup
 RUN --mount=type=cache,target=/root/.cache \
