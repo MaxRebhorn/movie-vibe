@@ -42,7 +42,17 @@ build:
 test:
   stage: test
   script:
+    - docker system prune -af --volumes || true
     - docker compose up -d --wait
+    - |
+      echo "Waiting for Elasticsearch..."
+      for i in {1..30}; do
+        if curl -s http://localhost:9200/_cluster/health | grep -q '"status":"green"\|"status":"yellow"'; then
+          echo "Elasticsearch ready!"
+          break
+        fi
+        sleep 2
+      done
     - docker compose exec -T web python manage.py migrate
     - docker compose exec -T web python manage.py createcachetable
     - |
