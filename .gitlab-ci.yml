@@ -25,7 +25,9 @@ before_script:
 build:
   stage: build
   script:
-    - docker build -f docker/Dockerfile --build-arg REQUIREMENTS=requirements-test.txt -t movie-vibe-test:latest .
+    - docker build -f docker/Dockerfile \
+        --build-arg REQUIREMENTS=requirements-test.txt \
+        -t movie-vibe-test:latest .
 
 test:
   stage: test

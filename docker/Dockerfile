@@ -17,8 +17,7 @@ COPY requirements-test.txt requirements-test.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --user --no-cache-dir -r ${REQUIREMENTS}
 
-RUN --mount=type=cache,target=/root/.cache \
-    python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
 
 # Stage 2: Runtime
 FROM python:3.11-slim
