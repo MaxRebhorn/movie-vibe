@@ -1,7 +1,9 @@
 image: docker:20.10.24
 
 services:
-  - docker:20.10.24-dind
+  - name: docker:20.10.24-dind
+    alias: docker
+
 
 variables:
   DOCKER_HOST: tcp://docker:2375
