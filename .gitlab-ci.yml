@@ -42,11 +42,9 @@ build-image:
     DOCKER_BUILDKIT: 1
   script:
     - docker compose -f docker-compose.ci.yml build
-  only:
-    refs:
-      - merge_requests
-      - main
-      - dev
+  # ❗ Remove or rework this:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
 
 ##########################
 # TEST
@@ -70,7 +68,8 @@ unit-test:
   after_script:
     - docker compose down
   needs:
-    - build-image
+    - job: build-image
+      optional: true  # Optional if build-image may not always run (optional helps avoid failure)
 
 ##########################
 # LINT (non-blocking)
@@ -88,7 +87,8 @@ lint-code:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   needs:
-    - build-image
+    - job: build-image
+      optional: true
 
 ##########################
 # SECURITY (non-blocking)
@@ -105,4 +105,5 @@ security-scan:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   needs:
-    - build-image
+    - job: build-image
+      optional: true
