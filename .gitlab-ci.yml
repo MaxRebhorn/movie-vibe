@@ -44,9 +44,7 @@ static_code_analysis:
     - . venv/bin/activate
     - pip install --upgrade pip --cache-dir=.cache/pip
     - pip install bandit flake8 flake8-django --cache-dir=.cache/pip
-    # Run Bandit for security issues, exclude virtual env, tests, migrations
     - bandit -r . -x venv,tests,migrations -o bandit_report.txt -f txt || true
-    # Run Flake8 with Django plugin, output HTML report
     - flake8 . --exclude=venv,migrations --format=html --htmldir=flake8_report || true
   artifacts:
     paths:
