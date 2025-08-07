@@ -1,5 +1,8 @@
 image: docker:20.10.24
 
+services:
+  - docker:20.10.24-dind
+
 variables:
   POSTGRES_DB: "test_db"
   POSTGRES_USER: "postgres"
@@ -7,38 +10,39 @@ variables:
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
   SKIP_HEAVY_TESTS: "1"
-
-services:
-  - docker:20.10.24-dind
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
 
 stages:
   - build
   - test
 
 before_script:
+  - apk add --no-cache curl py3-pip docker-compose
   - docker info
-  - docker compose version
+  - docker compose version || docker-compose version
 
 build:
   stage: build
   script:
-    # Build image using the test requirements
     - docker build -f docker/Dockerfile --build-arg REQUIREMENTS=requirements-test.txt -t movie-vibe-test:latest .
-
-  artifacts:
-    expire_in: 1 hour
-    paths:
-      - .docker
 
 test:
   stage: test
+  services:
+    - name: postgres:14
+      alias: db
+    - name: elasticsearch:7.17.6
+      alias: elasticsearch
+  variables:
+    POSTGRES_HOST: db
   script:
-    - docker compose up -d --wait
-    - docker compose exec web python manage.py migrate
-    - docker compose exec web python manage.py createcachetable
-    - docker compose exec web coverage run manage.py test --noinput
-    - docker compose exec web coverage report --fail-under=80
-    - docker compose exec web coverage xml
+    - docker compose -f docker/docker-compose.yml up -d --wait
+    - docker compose exec -T web python manage.py migrate
+    - docker compose exec -T web python manage.py createcachetable
+    - docker compose exec -T web coverage run manage.py test --noinput
+    - docker compose exec -T web coverage report --fail-under=80
+    - docker compose exec -T web coverage xml
     - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
   artifacts:
     paths:
@@ -46,4 +50,4 @@ test:
     expire_in: 1 week
 
 after_script:
-  - docker compose down
+  - docker compose -f docker/docker-compose.yml down --volumes --remove-orphans
