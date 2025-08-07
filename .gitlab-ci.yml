@@ -39,8 +39,7 @@ before_script:
 build:
   stage: build
   script:
-    - docker compose build --build-arg REQUIREMENTS=requirements-test.txt
-    # Tag the web service image (adjust service name if different)
+    - docker compose build --build-arg REQUIREMENTS=${REQUIREMENTS}
     - docker tag ${CI_PROJECT_NAME}_web:latest movie-vibe-test:latest
 
 static_code_analysis:
@@ -68,7 +67,7 @@ test:
     - docker compose up -d --wait
     - |
       echo "Waiting for Elasticsearch..."
-      for i in {1..30}; do
+      for i in $(seq 1 30); do
         if curl -s http://localhost:9200/_cluster/health | grep -q '"status":"green"\|"status":"yellow"'; then
           echo "Elasticsearch ready!"
           break
