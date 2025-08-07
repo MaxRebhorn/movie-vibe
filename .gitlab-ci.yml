@@ -22,8 +22,8 @@ variables:
 
 stages:
   - build
-  - test
   - static_analysis
+  - test
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
@@ -40,6 +40,26 @@ build:
   stage: build
   script:
     - docker compose build --build-arg REQUIREMENTS=requirements-test.txt
+    # Tag the web service image (adjust service name if different)
+    - docker tag ${CI_PROJECT_NAME}_web:latest movie-vibe-test:latest
+
+static_code_analysis:
+  stage: static_analysis
+  script:
+    - docker run --rm \
+        -v "$CI_PROJECT_DIR":/app \
+        -w /app \
+        movie-vibe-test:latest \
+        /bin/sh -c "
+          pip install --quiet bandit flake8 flake8-django && \
+          bandit -r . -x venv,tests,migrations -o bandit_report.txt -f txt || true && \
+          flake8 . --exclude=venv,migrations --format=html --htmldir=flake8_report || true
+        "
+  artifacts:
+    paths:
+      - bandit_report.txt
+      - flake8_report/
+    expire_in: 1 week
 
 test:
   stage: test
@@ -77,25 +97,4 @@ test:
       - coverage_html/
       - coverage.txt
       - coverage.xml
-    expire_in: 1 week
-
-static_code_analysis:
-  stage: static_analysis
-  script:
-    # Run bandit & flake8 inside the built 'web' container
-    - docker compose build --build-arg REQUIREMENTS=requirements-test.txt  # Make sure image exists
-    - |
-      docker run --rm \
-        -v $(pwd):/app \
-        -w /app \
-        your_project_web_image_name:latest \
-        /bin/sh -c "
-          pip install bandit flake8 flake8-django --cache-dir=.cache/pip && \
-          bandit -r . -x venv,tests,migrations -o bandit_report.txt -f txt || true && \
-          flake8 . --exclude=venv,migrations --format=html --htmldir=flake8_report || true
-        "
-  artifacts:
-    paths:
-      - bandit_report.txt
-      - flake8_report/
     expire_in: 1 week
