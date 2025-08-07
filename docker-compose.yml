@@ -64,7 +64,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       args:
-        REQUIREMENTS: ""
+        REQUIREMENTS: "requirements.txt"
     container_name: django_web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
