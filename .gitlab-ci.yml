@@ -19,7 +19,9 @@ variables:
   COMPOSE_DOCKER_CLI_BUILD: 1
   API_KEY: "dummy-key"
   REQUIREMENTS: requirements-test.txt
+
 stages:
+  - static_analysis
   - build
   - test
 
@@ -33,6 +35,24 @@ before_script:
   - apk add --no-cache docker-compose curl py3-pip
   - docker info
   - docker compose version || docker-compose version
+
+static_code_analysis:
+  stage: static_analysis
+  image: python:${PYTHON_VERSION}
+  script:
+    - python -m venv venv
+    - . venv/bin/activate
+    - pip install --upgrade pip --cache-dir=.cache/pip
+    - pip install bandit flake8 flake8-django --cache-dir=.cache/pip
+    # Run Bandit for security issues, exclude virtual env, tests, migrations
+    - bandit -r . -x venv,tests,migrations -o bandit_report.txt -f txt || true
+    # Run Flake8 with Django plugin, output HTML report
+    - flake8 . --exclude=venv,migrations --format=html --htmldir=flake8_report || true
+  artifacts:
+    paths:
+      - bandit_report.txt
+      - flake8_report/
+    expire_in: 1 week
 
 build:
   stage: build
