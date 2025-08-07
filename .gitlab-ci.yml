@@ -23,7 +23,7 @@ build:
   stage: build
   script:
     # Build the test image using Dockerfile.ci (with heavy test deps)
-    - docker build -f dockerfile.ci -t movie-vibe-test:latest .
+   - docker build -f docker/Dockerfile.ci -t movie-vibe-test:latest .
   artifacts:
     expire_in: 1 hour
     paths:
