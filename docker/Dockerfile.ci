@@ -12,11 +12,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies, Docker CLI, Docker Compose plugin, and cleanup cache
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libpq-dev \
     curl \
+    docker.io \
+    docker-compose \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy and install Python dependencies first for layer caching
