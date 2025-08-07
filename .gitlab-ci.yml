@@ -1,108 +1,49 @@
-stages:
-  - build
-  - test
-  - lint
-  - security
+image: docker:20.10.24
 
 variables:
-  PYTHONDONTWRITEBYTECODE: "1"
-  PYTHONUNBUFFERED: "1"
-  TRANSFORMERS_CACHE: ".cache/transformers"
-  TORCH_HOME: ".cache/torch"
-  SENTENCE_TRANSFORMERS_HOME: ".cache/sentence_transformers"
-  PYTHONPATH: "$CI_PROJECT_DIR"
-  DJANGO_SETTINGS_MODULE: django_backend.settings
   POSTGRES_DB: "test_db"
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "postgres"
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
 
-default:
-  image: dockerhub.cloud.queo.org/queo.web/azubi/movie-vibe:ci-image
-  cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - .cache/pip
-      - .cache/torch
-      - .cache/huggingface
-      - .cache/sentence_transformers
+services:
+  - docker:20.10.24-dind
 
-##########################
-# BUILD
-##########################
-build-image:
+stages:
+  - build
+  - test
+
+before_script:
+  - docker info
+  - docker compose version
+
+build:
   stage: build
-  image: docker:20.10.24
-  services:
-    - docker:20.10.24-dind
-  variables:
-    DOCKER_DRIVER: overlay2
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_BUILDKIT: 1
   script:
-    - docker compose -f docker-compose.ci.yml build
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
+    - docker compose build
 
-##########################
-# TEST
-##########################
-unit-test:
+test:
   stage: test
-  services:
-    - docker:20.10.24-dind
   script:
     - docker compose up -d --wait
+
+    # Datenbank bereit?
     - docker compose exec web python manage.py migrate
     - docker compose exec web python manage.py createcachetable
+
+
+    # Tests
+    - docker compose exec web pip install coverage --root-user-action=ignore
     - docker compose exec web coverage run manage.py test --noinput
     - docker compose exec web coverage report --fail-under=80
     - docker compose exec web coverage xml
+
     - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
   artifacts:
     paths:
       - coverage.xml
     expire_in: 1 week
-  after_script:
-    - docker compose down
-  needs:
-    - job: build-image
-      optional: true  # Optional if build-image may not always run (optional helps avoid failure)
 
-##########################
-# LINT (non-blocking)
-##########################
-lint-code:
-  stage: lint
-  script:
-    - flake8 movies review tags tmdb user django_backend > flake8.txt || true
-    - mypy movies review tags tmdb user django_backend --config-file mypy.ini || true
-  allow_failure: true
-  artifacts:
-    paths:
-      - flake8.txt
-    expire_in: 1 week
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  needs:
-    - job: build-image
-      optional: true
-
-##########################
-# SECURITY (non-blocking)
-##########################
-security-scan:
-  stage: security
-  script:
-    - bandit -r movies review tags tmdb user django_backend -f html -o bandit-report.html || true
-  allow_failure: true
-  artifacts:
-    paths:
-      - bandit-report.html
-    expire_in: 1 week
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  needs:
-    - job: build-image
-      optional: true
+after_script:
+  - docker compose down
