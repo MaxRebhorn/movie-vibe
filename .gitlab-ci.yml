@@ -9,7 +9,7 @@ variables:
   POSTGRES_PASSWORD: "postgres"
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
-  SKIP_HEAVY_TESTS: "1"  # This will skip the @skipIf decorated tests
+  SKIP_HEAVY_TESTS: "1"
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
 
@@ -24,10 +24,10 @@ before_script:
 
 build:
   stage: build
+  variables:
+    SKIP_HEAVY_TESTS: "1"
   script:
-    - docker build -f docker/Dockerfile \
-        --build-arg REQUIREMENTS=requirements-test.txt \
-        -t movie-vibe-test:latest .
+    - docker build -f docker/Dockerfile --build-arg REQUIREMENTS=requirements-test.txt -t movie-vibe-test:latest .
 
 test:
   stage: test
@@ -39,14 +39,11 @@ test:
   variables:
     POSTGRES_HOST: db
   script:
-    - docker compose -f docker/docker-compose.yml build --build-arg REQUIREMENTS=requirements-test.txt
-    - docker compose -f docker/docker-compose.yml up -d --wait
+    - docker compose -f docker-compose.yml build --build-arg REQUIREMENTS=requirements-test.txt
+    - docker compose -f docker-compose.yml up -d --wait
     - docker compose exec -T web python manage.py migrate
     - docker compose exec -T web python manage.py createcachetable
-    - docker compose exec -T web coverage run manage.py test \
-        --exclude=*embedding* \
-        --exclude=*vector* \
-        --noinput
+    - docker compose exec -T web coverage run manage.py test --exclude=*embedding* --exclude=*vector* --noinput
     - docker compose exec -T web coverage report --fail-under=80
     - docker compose exec -T web coverage xml
     - docker cp $(docker compose ps -q web):/app/coverage.xml ./coverage.xml
@@ -56,4 +53,4 @@ test:
     expire_in: 1 week
 
 after_script:
-  - docker compose -f docker/docker-compose.yml down --volumes --remove-orphans
+  - docker compose -f docker-compose.yml down --volumes --remove-orphans
