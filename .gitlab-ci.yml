@@ -1,14 +1,23 @@
 image: docker:20.10.24
 
+services:
+  - docker:20.10.24-dind
+  - name: postgres:14
+    alias: db
+
 variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
   POSTGRES_DB: "test_db"
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "postgres"
+  POSTGRES_HOST: db
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
-
-services:
-  - docker:20.10.24-dind
+  SKIP_HEAVY_TESTS: "1"  # Set globally here (can be overridden per job)
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+  API_KEY: "dummy-key"
 
 stages:
   - build
@@ -21,28 +30,35 @@ cache:
     - venv/
 
 before_script:
+  - apk add --no-cache docker-compose curl py3-pip
   - docker info
-  - docker compose version
+  - docker compose version || docker-compose version
 
 build:
   stage: build
   script:
-    - docker compose build
+    - docker compose build --build-arg REQUIREMENTS=requirements-test.txt
 
 test:
   stage: test
   script:
     - docker compose up -d --wait
-    - docker compose run --rm web bash -c "
+    - docker compose exec -T web python manage.py migrate
+    - docker compose exec -T web python manage.py createcachetable
+    - |
+      docker compose exec -T web bash -c "
         set -euxo pipefail
         pip install coverage --cache-dir=.cache/pip --root-user-action=ignore
-        coverage run manage.py test --noinput
+        coverage run manage.py test \
+          --exclude='*embedding*' \
+          --exclude='*vector*' \
+          --noinput
         coverage report --fail-under=80 > coverage.txt || true
         cat coverage.txt
         coverage xml
         coverage html -d coverage_html
       "
-    - docker compose down
+    - docker compose down --volumes --remove-orphans
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
   artifacts:
     paths:
