@@ -42,7 +42,6 @@ build-image:
     DOCKER_BUILDKIT: 1
   script:
     - docker compose -f docker-compose.ci.yml build
-  # ❗ Remove or rework this:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "dev"'
 
