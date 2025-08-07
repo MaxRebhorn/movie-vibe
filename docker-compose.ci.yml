@@ -4,8 +4,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.ci
-    volumes:
-      - .:/app
+
     environment:
       - SKIP_HEAVY_TESTS=1
     depends_on:
