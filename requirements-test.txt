@@ -29,3 +29,4 @@ flake8==7.0.0
 mypy==1.10.0
 django-stubs==4.2.7
 bandit==1.7.7
+ruff==0.12.7

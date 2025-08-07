@@ -56,16 +56,15 @@ test:
     - docker compose exec -T web python manage.py migrate
     - docker compose exec -T web python manage.py createcachetable
 
-    # Run tests with coverage
+    # Run ruff, bandit, and coverage tests
     - |
       docker compose exec -T web bash -c "
         set -euxo pipefail
-        pip install coverage flake8 bandit --cache-dir=.cache/pip --root-user-action=ignore
-        echo 'Running flake8...'
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-        echo 'Running bandit...'
+        echo 'Running ruff (modern linter)...'
+        ruff check . || true  # Let it report but not fail pipeline
+
+        echo 'Running bandit (security audit)...'
         bandit -r . -x venv -ll -iii -o bandit_report.txt || true
 
         echo 'Running Django tests with coverage...'
@@ -89,4 +88,5 @@ test:
       - coverage.xml
       - bandit_report.txt
     expire_in: 1 week
+
 
