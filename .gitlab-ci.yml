@@ -15,8 +15,8 @@ variables:
   PYTHON_VERSION: "3.11"
   ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
   SKIP_HEAVY_TESTS: "1"
-  DOCKER_BUILDKIT: 1
-  COMPOSE_DOCKER_CLI_BUILD: 1
+  DOCKER_BUILDKIT: "1"
+  COMPOSE_DOCKER_CLI_BUILD: "1"
   API_KEY: "dummy-key"
   REQUIREMENTS: requirements-test.txt
 
@@ -45,33 +45,25 @@ test:
   script:
     - docker system prune -af --volumes || true
     - docker compose up -d --wait
-
-    # Wait for Elasticsearch to become healthy
     - |
       echo "Waiting for Elasticsearch..."
       for i in {1..30}; do
-        STATUS=$(curl -s http://localhost:9200/_cluster/health | grep -Eo '"status":"[^"]+"' | cut -d':' -f2 | tr -d '"')
-        if [ "$STATUS" = "green" ] || [ "$STATUS" = "yellow" ]; then
-          echo "Elasticsearch is $STATUS"
+        if curl -s http://localhost:9200/_cluster/health | grep -q '"status":"green"\|"status":"yellow"'; then
+          echo "Elasticsearch ready!"
           break
         fi
-        echo "Still waiting for Elasticsearch... ($i)"
         sleep 2
       done
-
-    # Migrate DB and create cache table
     - docker compose exec -T web python manage.py migrate
     - docker compose exec -T web python manage.py createcachetable
-
-    # Run linters, security tools, and tests
     - |
       docker compose exec -T web bash -c "
         set -euxo pipefail
 
-        echo 'Running ruff...'
+        echo 'Running ruff (modern linter)...'
         ruff check . || true
 
-        echo 'Running bandit...'
+        echo 'Running bandit (security audit)...'
         bandit -r . -x venv -ll -iii -o bandit_report.txt || true
 
         echo 'Running Django tests with coverage...'
@@ -84,7 +76,6 @@ test:
         coverage xml
         coverage html -d coverage_html
       "
-
     - docker compose down --volumes --remove-orphans
 
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
