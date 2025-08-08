@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'tmdb',
     'review',
     'user.apps.UserConfig',
-
+    'tags'
 ]
 
 MIDDLEWARE = [

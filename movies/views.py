@@ -26,6 +26,64 @@ class MovieListCreateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class MovieSearch(APIView):
+    def get(self, request):
+        query = request.GET.get("q", "").strip()
+        genre = request.GET.get("genre")
+        min_rating = request.GET.get("min_rating")
+        keywords = request.GET.get("keywords")
+        year_from = request.GET.get("year_from")
+        year_to = request.GET.get("year_to")
+        language = request.GET.get("language")
+        country = request.GET.get("country")
+
+        if not query:
+            return Response([])
+
+        # Step 1: Elasticsearch query
+        search = MovieSearchService.search(query)
+        es_response = search.execute()
+        movie_ids = [hit.meta.id for hit in es_response]
+
+        # Step 2: ORM filtering
+        qs = Movie.objects.filter(id__in=movie_ids)
+
+        if genre:
+            qs = qs.filter(genres__contains=[genre])
+
+        if min_rating:
+            try:
+                qs = qs.filter(avg_rating__gte=float(min_rating))
+            except ValueError:
+                return Response({"error": "Invalid min_rating"}, status=400)
+
+        if year_from:
+            qs = qs.filter(release_date__year__gte=year_from)
+        if year_to:
+            qs = qs.filter(release_date__year__lte=year_to)
+
+        if keywords:
+            keyword_list = [k.strip() for k in keywords.split(",") if k.strip()]
+            qs = qs.filter(keywords__overlap=keyword_list)
+
+        if language:
+            qs = qs.filter(language__iexact=language)
+
+        if country:
+            qs = qs.filter(country__iexact=country)
+
+        # Step 3: Map by ES order
+        movie_map = {str(movie.id): movie for movie in qs}
+        sorted_movies = [
+            movie_map.get(str(hit.meta.id))
+            for hit in es_response
+            if str(hit.meta.id) in movie_map
+        ]
+
+        serializer = MovieSerializer([m for m in sorted_movies if m], many=True)
+        return Response(serializer.data)
+
+
 
 class MovieDetailView(APIView):
     def get(self, request, id):
