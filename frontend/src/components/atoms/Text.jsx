@@ -1,34 +1,24 @@
-// Text.jsx
 import React from 'react';
 import '../../styles/colors.css';
 
-export const Text = ({
-  variant = 'body',
-  color = 'white',
-  children,
-  className = '',
-  style = {}
-}) => {
-  const baseStyle = {
-    fontFamily: variant === 'heading' ? 'Roboto, sans-serif' : 'Inter, sans-serif',
-    ...(variant === 'heading' && {
-      fontSize: '57px',
-      lineHeight: '64px',
-      letterSpacing: '-0.25px',
-      fontWeight: 'normal'
-    }),
-    ...(variant === 'body' && {
-      fontSize: '16px',
-      lineHeight: '1.5',
-      fontWeight: 'normal'
-    }),
-    color: `var(--text-${color})`, // colors still come from CSS
-    ...style
+const Text = ({ variant, children, color = 'default', ...props }) => {
+  const getColorClass = () => {
+    switch(color) {
+      case 'accent': return 'text-rgb-217-33-44';
+      case 'muted': return 'text-rgb-179-179-179';
+      case 'white': return 'text-white';
+      default: return 'text-rgb-245-245-245';
+    }
   };
 
   return (
-    <p style={baseStyle} className={className}>
+    <p
+      className={`text-${variant} ${getColorClass()}`}
+      {...props}
+    >
       {children}
     </p>
   );
 };
+
+export default Text;

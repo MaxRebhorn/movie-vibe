@@ -1,14 +1,11 @@
 :root {
-  /* Primary Colors */
-  --color-primary-red: #D9212C;
-  --color-primary-black: #0B0B0D;
-  --color-primary-white: #DFDFDF;
-
-  /* Secondary Colors */
-  --color-secondary-bg: #141417;
-  --color-secondary-text: #B3B3B3;
-
-  /* Font Families */
-  --font-inter: 'Inter', sans-serif;
-  --font-roboto: 'Roboto', sans-serif;
+  --font-family-inter: 'Inter', sans-serif;
+  --font-family-roboto: 'Roboto', sans-serif;
+  --text-rgb-245-245-245: rgba(245, 245, 245, 1);
+  --text-white: rgba(255, 255, 255, 1);
+  --text-rgb-179-179-179: rgba(179, 179, 179, 1);
+  --text-rgb-217-33-44: rgba(217, 33, 44, 1);
+  --background-dark: rgba(11, 11, 13, 1);
+  --background-card: rgba(20, 20, 23, 1);
+  --border-accent: rgba(217, 33, 44, 1);
 }

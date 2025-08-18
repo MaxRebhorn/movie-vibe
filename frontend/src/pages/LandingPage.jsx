@@ -1,19 +1,20 @@
-import { Navigation } from '../components/organisms/Navigation';
-import { ProductGrid } from '../components/organisms/ProductGrid';
-import { SearchBar } from '../components/molecules/SearchBar';
-import { Text } from '../components/atoms/Text';
+import React from 'react';
+import Navbar from '../components/organisms/Navbar';
+import SearchSection from '../components/organisms/SearchSection';
+import MovieGrid from '../components/organisms/MovieGrid';
+import '../styles/colors.css';
+import '../styles/global.css';
 
-export const LandingPage = () => {
-  const products = [
-    // Product data would go here
-  ];
-
+function LandingPage() {
   return (
-    <div className="landing-page-1">
-      <Navigation />
-      <Text variant="heading">MoVi</Text>
-      <SearchBar />
-      <ProductGrid products={products} />
+    <div className="landing-page">
+      <Navbar />
+      <main className="main-container">
+        <SearchSection />
+        <MovieGrid />
+      </main>
     </div>
   );
-};
+}
+
+export default LandingPage;
