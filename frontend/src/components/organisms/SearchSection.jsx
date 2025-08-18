@@ -1,17 +1,16 @@
-import React from 'react';
-import Text from '../atoms/Text';
-import SearchBar from '../molecules/SearchBar';
-import '../../styles/colors.css';
+import React from "react";
+import SearchBar from "../molecules/SearchBar";
+import Text from "../atoms/Text";
 
-const SearchSection = () => {
+const SearchSection = ({ onSearch }) => {
   return (
-    <section className="search-section">
-      <Text variant="hero">
+    <div className="search-section">
+        <Text variant="hero">
         <span className="text-accent">Mo</span>
         <span>Vi</span>
       </Text>
-      <SearchBar />
-    </section>
+      <SearchBar onSearch={onSearch} />
+    </div>
   );
 };
 
