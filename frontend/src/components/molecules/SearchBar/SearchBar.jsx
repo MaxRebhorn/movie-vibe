@@ -1,9 +1,8 @@
 // frontend/src/components/organisms/SearchBar.jsx
 import React, { useState } from 'react';
-import Text from '../atoms/Text';
-import Icon from '../atoms/Icon';
-import '../../styles/colors.css';
-import '../../styles/global.css';
+import Text from '../../atoms/Text/Text';
+import Icon from '../../atoms/Icon/Icon';
+import styles from './SearchBar.module.css';
 
 const SearchBar = ({ onSearch }) => {
   const [query, setQuery] = useState("");
@@ -15,32 +14,20 @@ const SearchBar = ({ onSearch }) => {
     }
   };
 
-  return (
-    <form className="search-bar" onSubmit={handleSubmit}>
-      {/* Text input */}
+   return (
+    <form className={styles.form} onSubmit={handleSubmit}>
       <input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search for a Movie"
-        className="search-input"
+        className={styles.input}
       />
-
-      {/* Icon as button */}
-      <button
-        type="submit"
-        className="search-button"
-        style={{
-          background: 'transparent',
-          border: 'none',
-          padding: 0,
-          cursor: 'pointer'
-        }}
-      >
-        <Icon
-          name="search.svg"
+      <button type="submit" className={styles.button}>
+        <img
+          src="/search.svg"
           alt="Search icon"
-          className="search-icon"
+          className={styles.icon}
           style={{ color: 'var(--text-primary)' }}
         />
       </button>

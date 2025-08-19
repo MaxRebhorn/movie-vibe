@@ -1,6 +1,6 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LandingPage from "./pages/LandingPage"; // adjust if path differs
+import LandingPage from "./pages/LandingPage/LandingPage"; // adjust if path differs
 
 function App() {
   return (

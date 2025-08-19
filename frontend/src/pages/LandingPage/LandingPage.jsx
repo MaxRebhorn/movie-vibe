@@ -1,9 +1,8 @@
 import React, {useState} from 'react';
-import Navbar from '../components/organisms/Navbar';
-import SearchSection from '../components/organisms/SearchSection';
-import MovieGrid from '../components/organisms/MovieGrid';
-import '../styles/colors.css';
-import '../styles/global.css';
+import Navbar from '../../components/organisms/Navbar/Navbar';
+import SearchSection from '../../components/organisms/SearchSection/SearchSection';
+import MovieGrid from '../../components/organisms/MovieGrid/MovieGrid';
+import styles from './LandingPage.module.css';
 
 function LandingPage() {
     const [movies, setMovies] = useState([]);
@@ -27,9 +26,9 @@ function LandingPage() {
     };
 
     return (
-        <div className="landing-page">
+        <div className={styles.container}>
             <Navbar/>
-            <main className="main-container">
+            <main className={styles.main}>
                 <SearchSection onSearch={handleSearch}/>
                 <MovieGrid movies={movies}/>
             </main>

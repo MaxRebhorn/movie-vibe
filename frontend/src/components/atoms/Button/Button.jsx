@@ -1,6 +1,6 @@
 import React from 'react';
-import Text from './Text';
-import '../../styles/colors.css';
+import Text from '../Text/Text';
+import '../../../styles/colors.css';
 
 const Button = ({ children, ...props }) => {
   return (
