@@ -18,7 +18,11 @@
   z-index: 10;
 }
 
-
+.linkWrapper {
+  display: inline-block;   /* don’t stretch full width */
+  text-decoration: none;   /* remove underline */
+  color: inherit;          /* inherit text color */
+}
 
 .image {
   width: 100%;

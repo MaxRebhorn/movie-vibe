@@ -3,6 +3,7 @@ import Text from '../../atoms/Text/Text';
 import Icon from '../../atoms/Icon/Icon';
 import IconButton from '../../molecules/IconButton/IconButton';
 import styles from './Navbar.module.css';
+import {Link} from "react-router-dom";
 
 
 const Navbar = () => {
@@ -24,7 +25,8 @@ const Navbar = () => {
     return (
         <nav className={styles.navbar}>
             <div className={styles.logo}>
-                <Icon name="logo.svg" alt="Logo" className={styles.icon}/>
+                <Link to={`/`} className={styles.linkWrapper}>
+                    <Icon name="logo.svg" alt="Logo" className={styles.icon}/></Link>
             </div>
             <div className={styles.items}>
                 <Text variant="menu" className={styles.item}>Page</Text>

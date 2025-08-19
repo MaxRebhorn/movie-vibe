@@ -6,6 +6,7 @@ class Movie(models.Model):
     original_title = models.CharField(max_length=50)
     synopsis = models.TextField()  # Changed to TextField for longer content
     plot = models.TextField(null=True)
+    plot_normalized = models.TextField(null=True)
     tagline = models.CharField(max_length=255)
     language = models.CharField(max_length=50)
     country = models.CharField(max_length=4)
@@ -28,7 +29,6 @@ class Movie(models.Model):
     tmdb_id = models.IntegerField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     class Meta:
         db_table = "Movie"
         ordering = ['-release_date']

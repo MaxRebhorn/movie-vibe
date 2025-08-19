@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from .models import Movie
 from .serializers import MovieSerializer
 from .services.movie_search import MovieSearchService
-from .services.vector_search import get_similar_movies
+from .services.vector_search import get_similar_movies, get_similar_movies_across
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +126,7 @@ class MovieSimilarView(APIView):
                 limit=limit,
                 collection="movies_narrative"
             )
-
+            # similar_ids = get_similar_movies_across(movie_id=reference_movie.id,limit=limit)
             similar_movies = Movie.objects.filter(id__in=similar_ids)
             movie_dict = {movie.id: movie for movie in similar_movies}
             ordered = [movie_dict[mid] for mid in similar_ids if mid in movie_dict]
