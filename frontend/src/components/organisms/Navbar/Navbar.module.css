@@ -1,0 +1,40 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--bg-card);
+    height: 60px;
+    width: 100%;
+    z-index: 1000;
+     margin: 0;
+}
+
+.logo {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    height: 100px;
+    width: auto;
+    max-height: 200%;
+    object-fit: contain;
+}
+
+.items {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.item {
+    padding: 0.5rem 1rem;
+}
+
+@media (max-width: 768px) {
+    .items {
+        gap: 16px;
+    }
+}

@@ -1,0 +1,65 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  width: 25.5%;
+  min-width: 240px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+  position: relative; /* for z-index */
+}
+
+.card:hover {
+  background-color: var(--border-accent);
+  transform: scale(1.2);
+  z-index: 10;
+}
+
+
+
+.image {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.textContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.cast {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.year {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+  .card {
+    width: 100%;
+  }
+}
