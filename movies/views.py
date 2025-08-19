@@ -26,7 +26,7 @@ class MovieListCreateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class MovieSearch(APIView):
+class MovieSearchFiltered(APIView):
     def get(self, request):
         query = request.GET.get("q", "").strip()
         genre = request.GET.get("genre")

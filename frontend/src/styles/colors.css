@@ -1,17 +1,37 @@
 :root {
   --font-family-inter: 'Inter', sans-serif;
   --font-family-roboto: 'Roboto', sans-serif;
+}
 
-  /* Text colors */
+/* 🌙 Dark Theme (default) */
+:root[data-theme="dark"] {
   --text-primary: rgba(245, 245, 245, 1);
   --text-white: rgba(255, 255, 255, 1);
   --text-muted: rgba(179, 179, 179, 1);
   --text-accent: rgba(217, 33, 44, 1);
 
-  /* Background colors */
   --bg-dark: rgba(11, 11, 13, 1);
   --bg-card: rgba(20, 20, 23, 1);
 
-  /* Border colors */
   --border-accent: rgba(217, 33, 44, 1);
+}
+
+/* ☀️ Light Theme */
+:root[data-theme="light"] {
+  --text-primary: rgba(20, 20, 23, 1);   /* dark text */
+  --text-white: rgba(11, 11, 13, 1);     /* nearly black */
+  --text-muted: rgba(100, 100, 100, 1);  /* softer gray */
+  --text-accent: rgba(217, 33, 44, 1);   /* same accent red */
+
+  --bg-dark: rgba(245, 245, 245, 1);     /* light background */
+  --bg-card: rgba(230, 230, 230, 1);     /* card slightly darker */
+
+  --border-accent: rgba(217, 33, 44, 1); /* keep red borders */
+}
+html {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+body, .navbar, .navbar__items, .navbar__button, .navbar__toggle, .navbar__item {
+  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
 }

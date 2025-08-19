@@ -1,35 +1,40 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Navbar from '../components/organisms/Navbar';
 import SearchSection from '../components/organisms/SearchSection';
 import MovieGrid from '../components/organisms/MovieGrid';
 import '../styles/colors.css';
 import '../styles/global.css';
-import { useState } from 'react';
 
 function LandingPage() {
-  const [movies, setMovies] = useState([]);
+    const [movies, setMovies] = useState([]);
 
-  const handleSearch = async (query) => {
-    console.log("Searching for:", query); // test first
+    const handleSearch = async (query) => {
+        if (!query) return; // don't search empty query
+        try {
+            console.log("Searching for:", query); // debug
+            const res = await fetch(`http://localhost:8000/api/movies/search/?q=${encodeURIComponent(query)}`);
 
-    // later we'll fetch from backend
-    // const res = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
-    // const data = await res.json();
-    // setMovies(data.results);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
-    // For now: mock result
-    setMovies([{ id: 1, title: query, year: 2025 }]);
-  };
+            const data = await res.json();
+            console.log("Search result:", data); // debug
 
-  return (
-    <div className="landing-page">
-      <Navbar />
-      <main className="main-container">
-        <SearchSection onSearch={handleSearch} />
-        <MovieGrid movies={movies} />
-      </main>
-    </div>
-  );
+            // If backend returns { movies: [...] } adjust accordingly
+            setMovies(data.movies || data);
+        } catch (err) {
+            console.error("Search failed:", err);
+        }
+    };
+
+    return (
+        <div className="landing-page">
+            <Navbar/>
+            <main className="main-container">
+                <SearchSection onSearch={handleSearch}/>
+                <MovieGrid movies={movies}/>
+            </main>
+        </div>
+    );
 }
 
 export default LandingPage;
