@@ -208,3 +208,111 @@ img {
 .icon-button:focus {
   outline: none;
 }
+/* Add to global.css */
+.product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  max-width: 240px;
+}
+
+.product-image {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.release-year {
+  align-self: flex-start;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Text variants */
+.text-small-bold {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 140%;
+}
+
+.text-extra-small {
+  font-size: 12px;
+  line-height: 120%;
+}
+
+/* Product card specific */
+.product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  border-radius: 8px;
+  max-width: 240px;
+}
+
+.product-image {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.text-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.cast-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.release-year {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
