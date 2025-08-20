@@ -10,3 +10,12 @@
     margin-right: -16px;
   }
 }
+
+.error {
+    color: var(--text-accent);
+    text-align: center;
+    padding: 1rem;
+    margin: 1rem 0;
+    background-color: rgba(217, 33, 44, 0.1);
+    border-radius: 6px;
+}

@@ -1,16 +1,27 @@
-// LoginForm.jsx (Organism Level)
-import React from 'react';
+// LoginForm.jsx (Updated with error handling)
+import React, { useState } from 'react';
 import AuthCard from '../../molecules/AuthCard/AuthCard';
 import AuthForm from '../../molecules/AuthForm/AuthForm';
 import styles from './LoginForm.module.css';
 
 function LoginForm({ onSubmit }) {
+    const [error, setError] = useState('');
+
+    const handleLogin = async (formData) => {
+        setError('');
+        try {
+            await onSubmit(formData);
+        } catch (error) {
+            setError(error.message || 'Login failed. Please try again.');
+        }
+    };
+
     const loginFields = [
         {
             name: 'username',
             type: 'text',
-            label: 'Username or Email',
-            placeholder: 'Enter your username or email',
+            label: 'Username',
+            placeholder: 'Enter your username',
             required: true
         },
         {
@@ -31,9 +42,10 @@ function LoginForm({ onSubmit }) {
                 footerLinkText="Sign up"
                 footerLinkPath="/register"
             >
+                {error && <div className={styles.error}>{error}</div>}
                 <AuthForm
                     fields={loginFields}
-                    onSubmit={onSubmit}
+                    onSubmit={handleLogin}
                     submitText="Sign In"
                 />
             </AuthCard>
