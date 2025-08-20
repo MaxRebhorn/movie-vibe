@@ -1,0 +1,45 @@
+/* Button.module.css (Fixed) */
+.button {
+    background: var(--bg-card);
+    border: 1px solid var(--border-accent);
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.button:hover {
+    background: var(--text-accent);
+    border-color: var(--text-accent);
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Variant styles */
+.primary {
+    background: var(--text-accent);
+    border-color: var(--text-accent);
+    color: white;
+}
+
+.primary:hover {
+    background: rgba(217, 33, 44, 0.8);
+    border-color: rgba(217, 33, 44, 0.8);
+}
+
+.secondary {
+    background: transparent;
+    border-color: var(--text-muted);
+}
+
+.secondary:hover {
+    background: var(--text-muted);
+    border-color: var(--text-muted);
+}

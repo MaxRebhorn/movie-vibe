@@ -1,0 +1,43 @@
+/* Input.module.css */
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.label {
+    margin-bottom: 0.5rem;
+}
+
+.required {
+    color: var(--text-accent);
+}
+
+.input {
+    padding: 0.75rem;
+    border: 1px solid var(--text-muted);
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--text-accent);
+    box-shadow: 0 0 0 3px rgba(217, 33, 44, 0.1);
+}
+
+.input.error {
+    border-color: var(--text-accent);
+}
+
+.input.error:focus {
+    border-color: var(--text-accent);
+    box-shadow: 0 0 0 3px rgba(217, 33, 44, 0.1);
+}
+
+.errorText {
+    margin-top: 0.5rem;
+}

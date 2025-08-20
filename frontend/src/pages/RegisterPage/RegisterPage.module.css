@@ -1,0 +1,26 @@
+/* RegisterPage.module.css */
+.registerPage {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background-color: var(--bg-dark);
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+}
+
+@media (max-width: 768px) {
+    .main {
+        padding: 1rem;
+    }
+}
