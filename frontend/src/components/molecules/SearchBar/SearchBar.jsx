@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Text from '../../atoms/Text/Text';
 import Icon from '../../atoms/Icon/Icon';
 import styles from './SearchBar.module.css';
+import anim from '../../../styles/animation.module.css';
 
 const SearchBar = ({ onSearch }) => {
   const [query, setQuery] = useState("");
@@ -23,7 +24,12 @@ const SearchBar = ({ onSearch }) => {
         placeholder="Search for a Movie"
         className={styles.input}
       />
-      <button type="submit" className={styles.button}>
+      <button type="submit" className={`
+        ${styles.button}
+        ${anim.btnPress}
+        ${anim.hoverGlow}
+        ${anim.hoverZoom}
+      `}>
         <img
           src="/search.svg"
           alt="Search icon"

@@ -4,7 +4,7 @@ import Text from '../../atoms/Text/Text';
 import Tag from '../../atoms/Tag/Tag';
 import '../../../styles/colors.css';
 import styles from './ProductCard.module.css';
-
+import anim from '../../../styles/animation.module.css'
 const ProductCard = ({
   id,               // <-- now you receive id properly
   className = '',
@@ -20,7 +20,7 @@ const ProductCard = ({
   const topTags = keywords.slice(0, 4);
 
   return (
-      <div className={`${styles.card} ${className}`} style={style}>
+      <div className={`${styles.card} ${className} ${anim.hoverLift}` } style={style}>
            <Link to={`/movies/${id}`} className={styles.linkWrapper}>
         <img src={image} alt={title} className={styles.image} />
            </Link>

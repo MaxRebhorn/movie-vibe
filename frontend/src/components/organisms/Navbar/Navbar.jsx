@@ -4,6 +4,7 @@ import Icon from '../../atoms/Icon/Icon';
 import IconButton from '../../molecules/IconButton/IconButton';
 import styles from './Navbar.module.css';
 import {Link} from "react-router-dom";
+import anim from "../../../styles/animation.module.css";
 
 
 const Navbar = () => {
@@ -25,7 +26,12 @@ const Navbar = () => {
     return (
         <nav className={styles.navbar}>
             <div className={styles.logo}>
-                <Link to={`/`} className={styles.linkWrapper}>
+                <Link to={`/`} className={`
+        ${styles.linkWrapper}
+        ${anim.btnPress}
+        ${anim.hoverGlow}
+        ${anim.hoverZoom}
+      `}>
                     <Icon name="logo.svg" alt="Logo" className={styles.icon}/></Link>
             </div>
             <div className={styles.items}>

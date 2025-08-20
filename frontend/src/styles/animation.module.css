@@ -1,0 +1,110 @@
+/* ================================
+   animations.module.css
+   Reusable motion utilities
+   ================================ */
+
+:root {
+  --anim-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --anim-medium: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --anim-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Entrance Animations */
+.fadeIn {
+  opacity: 0;
+  animation: fadeIn var(--anim-medium) forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.slideUp {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideUp var(--anim-medium) forwards;
+}
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scaleIn {
+  opacity: 0;
+  transform: scale(0.95);
+  animation: scaleIn var(--anim-medium) forwards;
+}
+@keyframes scaleIn {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Hover Animations */
+.hoverLift {
+  transition: transform var(--anim-fast), box-shadow var(--anim-medium);
+}
+.hoverLift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+
+.hoverGlow {
+  transition: color var(--anim-medium), text-shadow var(--anim-medium);
+}
+.hoverGlow:hover {
+  color: var(--text-accent);
+  text-shadow: 0 0 8px var(--text-accent);
+}
+
+.hoverZoom {
+  overflow: hidden;
+}
+.hoverZoom img,
+.hoverZoom video {
+  transition: transform var(--anim-slow);
+}
+.hoverZoom:hover img,
+.hoverZoom:hover video {
+  transform: scale(1.05);
+}
+
+/* Interactive */
+.btnPress {
+  transition: transform var(--anim-fast), box-shadow var(--anim-medium);
+}
+.btnPress:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.inputFocusGlow {
+  transition: border-color var(--anim-medium), box-shadow var(--anim-medium);
+}
+.inputFocusGlow:focus {
+  border-color: var(--text-accent);
+  box-shadow: 0 0 0 3px rgba(217, 33, 44, 0.3);
+}
+
+.shake {
+  animation: shake 0.4s ease;
+}
+@keyframes shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}
+
+.rotateSunMoon {
+  display: inline-block;
+  transition: transform 0.6s ease-in-out;
+}
+
+/* optional: sun rays or glow could scale */
+.sunGlow {
+  transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
+}
