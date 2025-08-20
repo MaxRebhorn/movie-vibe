@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import ProductCard from '../../molecules/ProductCard/ProductCard';
 import styles from './MovieGrid.module.css';
-
+import anim from '../../../styles/animation.module.css';
 const MovieGrid = ({movies}) => {
     const [animatedMovies, setAnimatedMovies] = useState([]);
 
@@ -33,6 +33,7 @@ const MovieGrid = ({movies}) => {
                     cast={movie.cast}
                     keywords={movie.keywords}
                     releaseYear={movie.release_date?.split('-')[0]}
+                    classname={anim.btnPress}
                 />
 
             ))}

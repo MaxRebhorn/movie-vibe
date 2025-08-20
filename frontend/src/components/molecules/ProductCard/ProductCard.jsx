@@ -20,9 +20,9 @@ const ProductCard = ({
   const topTags = keywords.slice(0, 4);
 
   return (
-      <div className={`${styles.card} ${className} ${anim.hoverLift}` } style={style}>
+      <div className={`${styles.card} ${className} ${anim.hoverLift}  ${anim.btnPress}` } style={style}>
            <Link to={`/movies/${id}`} className={styles.linkWrapper}>
-        <img src={image} alt={title} className={styles.image} />
+        <img src={image} alt={title}  className={`${styles.image} ${anim.btnPress}` } />
            </Link>
         <div className={styles.content}>
           <div className={styles.textContent}>
