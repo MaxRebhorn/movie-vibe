@@ -1,4 +1,4 @@
-// src/services/api.js (Fixed endpoints)
+// src/services/api.js
 const BASE_URL = 'http://localhost:8000';
 
 // Helper function to get CSRF token for Django
@@ -15,8 +15,6 @@ function getCSRFToken() {
 async function apiFetch(endpoint, options = {}) {
   try {
     const url = `${BASE_URL}${endpoint}`;
-    console.log('API Request:', url, options); // Debug log
-
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -27,7 +25,6 @@ async function apiFetch(endpoint, options = {}) {
     };
 
     const response = await fetch(url, config);
-    console.log('API Response:', response.status); // Debug log
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -41,36 +38,46 @@ async function apiFetch(endpoint, options = {}) {
   }
 }
 
-// Auth-related API calls - FIXED ENDPOINTS
+// Auth-related API calls
 export const authAPI = {
   login: (credentials) => {
-    return apiFetch('/api/login/', { // Added /api/ prefix
+    return apiFetch('/api/login/', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
   },
 
   register: (userData) => {
-    return apiFetch('/api/register/', { // Added /api/ prefix
+    return apiFetch('/api/register/', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
   },
 
   logout: () => {
-    return apiFetch('/api/logout/', { // Added /api/ prefix
+    return apiFetch('/api/logout/', {
       method: 'POST',
     });
   },
 
   checkAuth: () => {
-    return apiFetch('/api/check-auth/'); // Added /api/ prefix
+    return apiFetch('/api/check-auth/');
   },
 };
 
 // Movie-related API calls
 export const movieAPI = {
   search: (query) => {
+    return fetch(`http://localhost:8000/api/movies/search/?q=${encodeURIComponent(query)}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      });
+  },
+
+  searchAlt: (query) => {
     return apiFetch(`/api/movies/search/?q=${encodeURIComponent(query)}`);
   },
 

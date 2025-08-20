@@ -1,4 +1,4 @@
-// LoginPage.jsx (Using correct endpoint)
+// LoginPage.jsx
 import React from 'react';
 import Navbar from '../../components/organisms/Navbar/Navbar';
 import LoginForm from '../../components/organisms/LoginForm/LoginForm';
@@ -12,12 +12,16 @@ function LoginPage() {
             const response = await authAPI.login(formData);
             console.log('Login successful:', response);
 
-            // Redirect to home page
-            window.location.href = '/';
+            // Check if login was actually successful
+            if (response.detail === "Logged in successfully") {
+                window.location.href = '/';
+            } else {
+                throw new Error(response.detail || 'Login failed');
+            }
 
         } catch (error) {
             console.error('Login failed:', error);
-            throw error;
+            throw new Error(error.message || 'Login failed. Please try again.');
         }
     };
 

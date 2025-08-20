@@ -1,4 +1,4 @@
-// LoginForm.jsx (Updated with error handling)
+// LoginForm.jsx
 import React, { useState } from 'react';
 import AuthCard from '../../molecules/AuthCard/AuthCard';
 import AuthForm from '../../molecules/AuthForm/AuthForm';
@@ -12,7 +12,9 @@ function LoginForm({ onSubmit }) {
         try {
             await onSubmit(formData);
         } catch (error) {
-            setError(error.message || 'Login failed. Please try again.');
+            const errorMessage = error.message || 'Login failed. Please check your credentials and try again.';
+            setError(errorMessage);
+            console.error('Login error:', error);
         }
     };
 

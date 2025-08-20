@@ -1,10 +1,23 @@
-// RegisterForm.jsx (Organism Level)
-import React from 'react';
+// RegisterForm.jsx
+import React, { useState } from 'react';
 import AuthCard from '../../molecules/AuthCard/AuthCard';
 import AuthForm from '../../molecules/AuthForm/AuthForm';
 import styles from './RegisterForm.module.css';
 
 function RegisterForm({ onSubmit }) {
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (formData) => {
+        setError('');
+        try {
+            await onSubmit(formData);
+        } catch (error) {
+            const errorMessage = error.message || 'Registration failed. Please try again.';
+            setError(errorMessage);
+            console.error('Registration error:', error);
+        }
+    };
+
     const registerFields = [
         {
             name: 'username',
@@ -21,6 +34,20 @@ function RegisterForm({ onSubmit }) {
             required: true
         },
         {
+            name: 'first_name',
+            type: 'text',
+            label: 'First Name',
+            placeholder: 'Enter your first name (optional)',
+            required: false
+        },
+        {
+            name: 'last_name',
+            type: 'text',
+            label: 'Last Name',
+            placeholder: 'Enter your last name (optional)',
+            required: false
+        },
+        {
             name: 'password',
             type: 'password',
             label: 'Password',
@@ -28,7 +55,7 @@ function RegisterForm({ onSubmit }) {
             required: true
         },
         {
-            name: 'confirmPassword',
+            name: 'password2',
             type: 'password',
             label: 'Confirm Password',
             placeholder: 'Confirm your password',
@@ -45,9 +72,10 @@ function RegisterForm({ onSubmit }) {
                 footerLinkText="Sign in"
                 footerLinkPath="/login"
             >
+                {error && <div className={styles.error}>{error}</div>}
                 <AuthForm
                     fields={registerFields}
-                    onSubmit={onSubmit}
+                    onSubmit={handleSubmit}
                     submitText="Create Account"
                 />
             </AuthCard>

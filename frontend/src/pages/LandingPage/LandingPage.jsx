@@ -22,11 +22,20 @@ function LandingPage() {
             const data = await movieAPI.search(query);
             console.log("Search result:", data);
             
-            // If backend returns { movies: [...] } adjust accordingly
-            setMovies(data.movies || data);
+            // Handle different response formats
+            if (data.movies) {
+                setMovies(data.movies);
+            } else if (Array.isArray(data)) {
+                setMovies(data);
+            } else if (data.results) {
+                setMovies(data.results);
+            } else {
+                setMovies([]);
+            }
         } catch (err) {
             console.error("Search failed:", err);
             setError(err.message || 'Search failed. Please try again.');
+            setMovies([]);
         } finally {
             setLoading(false);
         }

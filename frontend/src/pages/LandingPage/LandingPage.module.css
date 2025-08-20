@@ -12,10 +12,11 @@
 }
 
 .error {
-    color: var(--text-accent);
-    text-align: center;
-    padding: 1rem;
-    margin: 1rem 0;
-    background-color: rgba(217, 33, 44, 0.1);
-    border-radius: 6px;
+    background-color: #fee;
+    color: #c33;
+    padding: 12px;
+    border: 1px solid #fcc;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-weight: 500;
 }
