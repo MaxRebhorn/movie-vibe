@@ -1,52 +1,24 @@
-import unittest
+from django.test import TestCase
 from unittest.mock import patch, MagicMock
 from datetime import datetime
 from movies.models import Movie
 from movies.services.vector_service import save_embedding
 
-
-class VectorServiceMockTest(unittest.TestCase):
-
-    def setUp(self):
-        # Mock the Qdrant client
-        self.mock_client_patcher = patch('movies.services.vector_service.client')
-        self.mock_client = self.mock_client_patcher.start()
-
-        # Mock collections config
-        self.collections_patcher = patch.dict(
-            'movies.services.vector_service.COLLECTIONS',
-            {
-                'vibe': 'movies_vibe',
-                'narrative': 'movies_narrative',
-                'style': 'movies_style'
-            }
-        )
-        self.collections_patcher.start()
-
-        # Mock Qdrant client methods
-        mock_collection = MagicMock()
-        mock_collection.name = "movies_vibe"
-        self.mock_client.get_collections.return_value = MagicMock(collections=[mock_collection])
-        self.mock_client.recreate_collection.return_value = None
-        self.mock_client.delete.return_value = None
-        self.mock_client.search.return_value = []
-        self.mock_client.upsert.return_value = None
-
-        # Patch embed_model so we don’t load SentenceTransformer
-        self.embed_patcher = patch('movies.services.embed_service.embed_model')
-        self.mock_embed_model = self.embed_patcher.start()
-        self.mock_embed_model.return_value = {
-            'vibe': [0.1, 0.2, 0.3],
-            'narrative': [0.4, 0.5, 0.6],
-            'style': [0.7, 0.8, 0.9]
-        }
-
-    def tearDown(self):
-        self.mock_client_patcher.stop()
-        self.collections_patcher.stop()
-        self.embed_patcher.stop()
+# Patch the Qdrant client and COLLECTIONS for all tests
+@patch.dict(
+    'movies.services.vector_service.COLLECTIONS',
+    {
+        'vibe': 'movies_vibe',
+        'narrative': 'movies_narrative',
+        'style': 'movies_style'
+    }
+)
+@patch('movies.services.vector_service.client')
+@patch('movies.services.embed_service.embed_model')
+class VectorServiceMockTest(TestCase):
 
     def create_movie(self, title, keywords):
+        """Helper to create a Movie instance for tests"""
         return Movie(
             title=title,
             original_title=title,
@@ -69,12 +41,34 @@ class VectorServiceMockTest(unittest.TestCase):
             tmdb_id=hash(title) % 1000000
         )
 
-    def test_embed_and_save(self):
+    def test_embed_and_save(self, mock_embed_model, mock_qdrant_client):
+        """Test embedding and saving vectors with mocks"""
+
+        # Mock embeddings to avoid calling sentence-transformers
+        mock_embed_model.return_value = {
+            "vibe": [0.1, 0.2, 0.3],
+            "narrative": [0.4, 0.5, 0.6],
+            "style": [0.7, 0.8, 0.9]
+        }
+
+        # Mock Qdrant client methods
+        mock_qdrant_client.upsert = MagicMock()
+        # Return an object with a 'collections' attribute
+        mock_get_collections = MagicMock()
+        mock_get_collections.collections = []
+        mock_qdrant_client.get_collections = MagicMock(return_value=mock_get_collections)
+
+        mock_qdrant_client.recreate_collection = MagicMock()
+        mock_qdrant_client.delete = MagicMock()
+        mock_qdrant_client.search = MagicMock(return_value=[])
+
+        # Create a test movie
         movie = self.create_movie("Magic School", ["magic", "school", "wizard"])
 
-        # use mocked embed_model (fast, no transformer load)
-        embeddings = self.mock_embed_model(movie)
+        # Get embeddings (mocked)
+        embeddings = mock_embed_model(movie)
 
+        # Test saving embeddings
         for vector_type, vector in embeddings.items():
             payload = {
                 "movie_tmdb_id": movie.tmdb_id,
@@ -83,9 +77,5 @@ class VectorServiceMockTest(unittest.TestCase):
             }
             save_embedding(vector, movie.tmdb_id, payload, vector_type)
 
-        # Verify client.upsert was called
-        self.assertTrue(self.mock_client.upsert.called)
-
-
-if __name__ == "__main__":
-    unittest.main()
+            # Verify upsert was called
+            mock_qdrant_client.upsert.assert_called()
