@@ -47,3 +47,11 @@
         gap: 16px;
     }
 }
+/* Navbar.module.css */
+.icon {
+  width: 24px;      /* pick your desired size */
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;   /* prevents icons from shrinking */
+}
+

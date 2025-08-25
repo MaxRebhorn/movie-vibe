@@ -32,18 +32,39 @@ const Navbar = () => {
         ${anim.hoverGlow}
         ${anim.hoverZoom}
       `}>
-                    <Icon name="logo.svg" alt="Logo" className={styles.icon}/></Link>
+                    <Icon name="logo.svg" alt="Logo"/></Link>
             </div>
             <div className={styles.items}>
-                <Text variant="menu" className={styles.item}>Page</Text>
-                <Text variant="menu" className={styles.item}>Page</Text>
-                <Text variant="menu" className={styles.item}>Page</Text>
-                <Icon name={theme === 'dark' ? 'user_light.svg' : 'user_dark.svg'}></Icon>
                 <IconButton
                     name={theme === 'dark' ? 'sun.svg' : 'moon.svg'}
                     alt="Toggle theme"
                     onClick={toggleTheme}
+                    className={styles.icon}   // make sure IconButton passes this down to the Icon inside
                 />
+                <Link to={`/user`} className={`
+        ${styles.linkWrapper}
+        ${anim.btnPress}
+        ${anim.hoverGlow}
+        ${anim.hoverZoom}
+      `}><Icon name={theme !== 'dark' ? 'review_light.svg' : 'review.svg'} className={styles.icon}/></Link>
+                <Link to={`/user`} className={`
+        ${styles.linkWrapper}
+        ${anim.btnPress}
+        ${anim.hoverGlow}
+        ${anim.hoverZoom}
+      `}> <Icon name={theme !== 'dark' ? 'add_light.svg' : 'add.svg'} className={styles.icon}/></Link>
+                <Link to={`/user`} className={`
+        ${styles.linkWrapper}
+        ${anim.btnPress}
+        ${anim.hoverGlow}
+        ${anim.hoverZoom}
+      `}><Icon name={theme !== 'dark' ? 'like_light.svg' : 'like.svg'} className={styles.icon}/></Link>
+                <Link to={`/user`} className={`
+        ${styles.linkWrapper}
+        ${anim.btnPress}
+        ${anim.hoverGlow}
+        ${anim.hoverZoom}
+      `}> <Icon name={theme !== 'dark' ? 'user_light.svg' : 'user.svg'} className={styles.icon}/></Link>
             </div>
         </nav>
     );

@@ -1,0 +1,33 @@
+.container {
+    display: flex;
+}
+
+.leftColumn {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding-right: 15%;
+    padding-left: 10%;
+    transition: 0.15s;
+    height: 602.891px;
+    transform: translate(0px, 41px);
+    width: 724.117px;
+}
+
+.rightColumn {
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding-right: 5%;
+    transition: 0.15s;
+    height: 643.891px;
+    transform: translate(-60.5px, 41px);
+    width: 214.883px;
+}
+
+
