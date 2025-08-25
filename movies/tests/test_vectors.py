@@ -6,7 +6,7 @@ from movies.services import vector_service
 from movies.services.vector_service import save_embedding, COLLECTIONS
 from movies.services.embed_service import embed_model
 
-
+#change
 class VectorServiceMockTest(unittest.TestCase):
 
     # Update the test_vectors.py setUp method to mock COLLECTIONS
