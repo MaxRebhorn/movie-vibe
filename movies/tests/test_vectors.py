@@ -1,41 +1,24 @@
-import unittest
+from django.test import TestCase
 from unittest.mock import patch, MagicMock
 from datetime import datetime
 from movies.models import Movie
-from movies.services import vector_service
-from movies.services.vector_service import save_embedding, COLLECTIONS
-from movies.services.embed_service import embed_model
+from movies.services.vector_service import save_embedding
 
-
-class VectorServiceMockTest(unittest.TestCase):
-
-    # Update the test_vectors.py setUp method to mock COLLECTIONS
-    def setUp(self):
-        self.mock_client_patcher = patch('movies.services.vector_service.client')
-        self.mock_client = self.mock_client_patcher.start()
-
-        # Mock collections configuration
-        self.collections_patcher = patch.dict(
-            'movies.services.vector_service.COLLECTIONS',
-            {
-                'vibe': 'movies_vibe',
-                'narrative': 'movies_narrative',
-                'style': 'movies_style'
-            }
-        )
-        self.collections_patcher.start()
-
-        # Rest of the setup remains the same...
-        self.mock_client.get_collections.return_value = MagicMock(collections=[])
-        self.mock_client.recreate_collection.return_value = None
-        self.mock_client.delete.return_value = None
-        self.mock_client.search.return_value = []
-
-    def tearDown(self):
-        self.mock_client_patcher.stop()
-        self.collections_patcher.stop()
+# Patch the Qdrant client and COLLECTIONS for all tests
+@patch.dict(
+    'movies.services.vector_service.COLLECTIONS',
+    {
+        'vibe': 'movies_vibe',
+        'narrative': 'movies_narrative',
+        'style': 'movies_style'
+    }
+)
+@patch('movies.services.vector_service.client')
+@patch('movies.services.embed_service.embed_model')
+class VectorServiceMockTest(TestCase):
 
     def create_movie(self, title, keywords):
+        """Helper to create a Movie instance for tests"""
         return Movie(
             title=title,
             original_title=title,
@@ -58,12 +41,32 @@ class VectorServiceMockTest(unittest.TestCase):
             tmdb_id=hash(title) % 1000000
         )
 
-    def test_embed_and_save(self):
-        # Create test movie
+    def test_embed_and_save(self, mock_embed_model, mock_qdrant_client):
+        """Test embedding and saving vectors with mocks"""
+
+        # Mock embeddings to avoid calling sentence-transformers
+        mock_embed_model.return_value = {
+            "vibe": [0.1, 0.2, 0.3],
+            "narrative": [0.4, 0.5, 0.6],
+            "style": [0.7, 0.8, 0.9]
+        }
+
+        # Mock Qdrant client methods
+        mock_qdrant_client.upsert = MagicMock()
+        # Return an object with a 'collections' attribute
+        mock_get_collections = MagicMock()
+        mock_get_collections.collections = []
+        mock_qdrant_client.get_collections = MagicMock(return_value=mock_get_collections)
+
+        mock_qdrant_client.recreate_collection = MagicMock()
+        mock_qdrant_client.delete = MagicMock()
+        mock_qdrant_client.search = MagicMock(return_value=[])
+
+        # Create a test movie
         movie = self.create_movie("Magic School", ["magic", "school", "wizard"])
 
-        # Get embeddings
-        embeddings = embed_model(movie)
+        # Get embeddings (mocked)
+        embeddings = mock_embed_model(movie)
 
         # Test saving embeddings
         for vector_type, vector in embeddings.items():
@@ -74,9 +77,5 @@ class VectorServiceMockTest(unittest.TestCase):
             }
             save_embedding(vector, movie.tmdb_id, payload, vector_type)
 
-            # Verify the mock was called
-            self.mock_client.upsert.assert_called()
-
-
-if __name__ == "__main__":
-    unittest.main()
+            # Verify upsert was called
+            mock_qdrant_client.upsert.assert_called()
