@@ -2,23 +2,16 @@ image: docker:20.10.24
 
 services:
   - docker:20.10.24-dind
-  - name: postgres:14
-    alias: db
 
 variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
-  POSTGRES_DB: "test_db"
-  POSTGRES_USER: "postgres"
-  POSTGRES_PASSWORD: "postgres"
-  POSTGRES_HOST: db
   PYTHON_VERSION: "3.11"
-  ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
+  REQUIREMENTS: requirements-test.txt
+  API_KEY: "dummy-key"
   SKIP_HEAVY_TESTS: "1"
   DOCKER_BUILDKIT: "1"
   COMPOSE_DOCKER_CLI_BUILD: "1"
-  API_KEY: "dummy-key"
-  REQUIREMENTS: requirements-test.txt
 
 stages:
   - build
@@ -44,27 +37,29 @@ test:
   stage: test
   script:
     - docker system prune -af --volumes || true
+
+    # Start all containers defined in docker-compose.yml
     - docker compose up -d --wait
+
+    # Ensure Elasticsearch is ready before tests
     - |
-      echo "Checking Elasticsearch health from inside the web container..."
+      echo "Waiting for Elasticsearch to become healthy..."
+      for i in {1..30}; do
+        if curl -s http://localhost:9200/_cluster/health?wait_for_status=yellow; then
+          echo "Elasticsearch is ready"
+          break
+        fi
+        echo "Retry $i: Elasticsearch not ready yet..."
+        sleep 2
+      done
 
-      docker compose exec -T web bash -c '
-        echo "================ ELASTICSEARCH DIAGNOSTICS ================"
-        echo "→ Curling http://elasticsearch:9200/_cluster/health"
-        curl -s http://elasticsearch:9200/_cluster/health?pretty || echo "FAILED"
-        echo "→ Curling http://elasticsearch:9200/"
-        curl -s http://elasticsearch:9200/ || echo "FAILED"
-        echo "→ Resolving elasticsearch hostname..."
-        getent hosts elasticsearch || echo "FAILED"
-        echo "================ END DIAGNOSTICS ================"
-      '
-
+    # Run migrations and setup
     - docker compose exec -T web python manage.py migrate
     - docker compose exec -T web python manage.py createcachetable
-    - |
-      docker compose exec -T web bash -c "
-        set -euxo pipefail
 
+    # Linting & security checks
+    - docker compose exec -T web bash -c "
+        set -euxo pipefail
         echo 'Running ruff (modern linter)...'
         ruff check . || true
 
@@ -72,15 +67,14 @@ test:
         bandit -r . -x venv -ll -iii -o bandit_report.txt || true
 
         echo 'Running Django tests with coverage...'
-        coverage run manage.py test \
-          --exclude='*embedding*' \
-          --exclude='*vector*' \
-          --noinput
+        coverage run manage.py test --noinput
         coverage report --fail-under=80 > coverage.txt || true
         cat coverage.txt
         coverage xml
         coverage html -d coverage_html
       "
+
+    # Tear down
     - docker compose down --volumes --remove-orphans
 
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
