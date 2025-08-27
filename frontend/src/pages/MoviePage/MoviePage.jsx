@@ -63,6 +63,7 @@ function MoviePage() {
                     cast={movie.cast}
                     poster={movie.poster_url}
                     trailer={movie.trailer_url}
+                    streaming_providers={movie.streaming_providers}
                 />
 
                 <h2>Similar Movies</h2>

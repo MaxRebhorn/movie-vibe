@@ -3,3 +3,62 @@
   gap: 1rem;
   margin-top: 0.5rem;
 }
+.providersContainer {
+  margin-top: 1rem;
+}
+
+.providersTitle {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.providersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.providerCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #1e1e1e;
+  border-radius: 12px;
+  padding: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.providerCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.providerLogo {
+  height: 40px;
+  margin-bottom: 0.5rem;
+}
+
+.providerName {
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.providerType {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+/* Optional colors by type */
+.flatrate {
+  border: 1px solid #4caf50;
+}
+.buy {
+  border: 1px solid #2196f3;
+}
+.rent {
+  border: 1px solid #ff9800;
+}

@@ -1,4 +1,4 @@
-// MovieCastList.jsx
+// StreamingProviderList.jsx
 import styles from "./MovieCastList.module.css";
 import Tag from "../../atoms/Tag/Tag";
 import '../../../styles/colors.css';

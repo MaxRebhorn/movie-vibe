@@ -1,6 +1,25 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+
+class StreamingProvider(models.Model):
+    tmdb_id = models.IntegerField(unique=True)  # TMDb's provider_id
+    name = models.CharField(max_length=100)
+    logo_path = models.CharField(max_length=255, blank=True, null=True)
+
+    def logo_url(self):
+        if self.logo_path:
+            return f"https://image.tmdb.org/t/p/w92{self.logo_path}"
+        return None
+
+    class Meta:
+        db_table = "StreamingProvider"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class Movie(models.Model):
     title = models.CharField(max_length=50)
     original_title = models.CharField(max_length=50)
@@ -27,8 +46,43 @@ class Movie(models.Model):
         default=0.0
     )
     tmdb_id = models.IntegerField(unique=True)
+
+    # ✅ Make streaming providers optional (nullable ManyToMany)
+    streaming_providers = models.ManyToManyField(
+        StreamingProvider,
+        through="MovieProviderLink",
+        related_name="movies",
+        blank=True,
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = "Movie"
         ordering = ['-release_date']
+
+    def __str__(self):
+        return self.title
+
+
+class MovieProviderLink(models.Model):
+    """Intermediate table to capture the relation + access type."""
+    ACCESS_CHOICES = [
+        ("flatrate", "Flatrate"),
+        ("buy", "Buy"),
+        ("rent", "Rent"),
+    ]
+
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    provider = models.ForeignKey(StreamingProvider, on_delete=models.CASCADE)
+    access_type = models.CharField(max_length=20, choices=ACCESS_CHOICES)
+    link = models.URLField(blank=True, null=True)  # link to TMDb availability page
+    country = models.CharField(max_length=5, default="DE")  # ISO 3166-1 code
+
+    class Meta:
+        db_table = "MovieProviderLink"
+        unique_together = ("movie", "provider", "access_type", "country")
+
+    def __str__(self):
+        return f"{self.movie.title} - {self.provider.name} ({self.access_type})"
