@@ -3,6 +3,9 @@ from sentence_transformers import SentenceTransformer
 
 
 def preload_models():
+    if os.getenv("SKIP_HEAVY_TESTS") == "1":
+        print("⏭️ Skipping model preload in CI")
+        return
     print("🔮 Preloading embedding models...")
 
     # Create cache directory if needed

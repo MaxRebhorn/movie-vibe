@@ -1,16 +1,23 @@
-# Stage 1: Builder
+# Stage 1: Builder with BuildKit caching
 FROM python:3.11-slim as builder
+
+ARG REQUIREMENTS=requirements.txt
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
+
+COPY requirements.txt requirements.txt
+COPY requirements-test.txt requirements-test.txt
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --user --no-cache-dir -r ${REQUIREMENTS}
+
+
 
 # Stage 2: Runtime
 FROM python:3.11-slim
@@ -19,25 +26,24 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libpq5 \
     curl \
-    netcat-openbsd \
-    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
 COPY --from=builder /root/.local /root/.local
+
 COPY . .
 
-# Configure model cache
 ENV PATH=/root/.local/bin:$PATH \
-    TRANSFORMERS_CACHE=/app/.cache \
-    SENTENCE_TRANSFORMERS_HOME=/app/.cache
+    TRANSFORMERS_CACHE=/cache/transformers \
+    SENTENCE_TRANSFORMERS_HOME=/cache/transformers \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
-RUN mkdir -p /app/.cache && chmod 777 /app/.cache
+RUN mkdir -p /cache/transformers && chmod 777 /cache
 
-# FIX: Correct entrypoint path
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh && \
-    dos2unix /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 8000
 ENTRYPOINT ["/entrypoint.sh"]

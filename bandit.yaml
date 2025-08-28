@@ -1,0 +1,6 @@
+# bandit.yaml (optional)
+skips: []
+exclude_dirs:
+  - venv
+  - tests
+  - htmlcov

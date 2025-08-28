@@ -1,14 +1,17 @@
 image: docker:20.10.24
 
-variables:
-  POSTGRES_DB: "test_db"
-  POSTGRES_USER: "postgres"
-  POSTGRES_PASSWORD: "postgres"
-  PYTHON_VERSION: "3.11"
-  ELASTICSEARCH_DSL_HOSTS: "http://elasticsearch:9200"
-
 services:
   - docker:20.10.24-dind
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+  PYTHON_VERSION: "3.11"
+  REQUIREMENTS: requirements-test.txt
+  API_KEY: "dummy-key"
+  SKIP_HEAVY_TESTS: "1"
+  DOCKER_BUILDKIT: "1"
+  COMPOSE_DOCKER_CLI_BUILD: "1"
 
 stages:
   - build
@@ -21,32 +24,64 @@ cache:
     - venv/
 
 before_script:
+  - apk add --no-cache docker-compose curl py3-pip
   - docker info
-  - docker compose version
+  - docker compose version || docker-compose version
 
 build:
   stage: build
   script:
-    - docker compose build
+    - docker compose build --build-arg REQUIREMENTS=${REQUIREMENTS}
 
 test:
   stage: test
   script:
+    - docker system prune -af --volumes || true
+
+    # Start all containers defined in docker-compose.yml
     - docker compose up -d --wait
-    - docker compose run --rm web bash -c "
+
+    # Ensure Elasticsearch is ready before tests
+    - |
+      echo "Waiting for Elasticsearch to become healthy..."
+      for i in {1..30}; do
+        if curl -s http://localhost:9200/_cluster/health?wait_for_status=yellow; then
+          echo "Elasticsearch is ready"
+          break
+        fi
+        echo "Retry $i: Elasticsearch not ready yet..."
+        sleep 2
+      done
+
+    # Run migrations and setup
+    - docker compose exec -T web python manage.py migrate
+    - docker compose exec -T web python manage.py createcachetable
+
+    # Linting & security checks
+    - docker compose exec -T web bash -c "
         set -euxo pipefail
-        pip install coverage --cache-dir=.cache/pip --root-user-action=ignore
+        echo 'Running ruff (modern linter)...'
+        ruff check . || true
+
+        echo 'Running bandit (security audit)...'
+        bandit -r . -x venv -ll -iii -o bandit_report.txt || true
+
+        echo 'Running Django tests with coverage...'
         coverage run manage.py test --noinput
         coverage report --fail-under=80 > coverage.txt || true
         cat coverage.txt
         coverage xml
         coverage html -d coverage_html
       "
-    - docker compose down
+
+    # Tear down
+    - docker compose down --volumes --remove-orphans
+
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
   artifacts:
     paths:
       - coverage_html/
       - coverage.txt
       - coverage.xml
+      - bandit_report.txt
     expire_in: 1 week

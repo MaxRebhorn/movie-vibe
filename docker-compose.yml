@@ -21,15 +21,16 @@ services:
       retries: 10
 
   vektor:
+    image: qdrant/qdrant
+    container_name: qdrant_vektor
     environment:
       - QDRANT_HOST=vektor
       - QDRANT_PORT=6333
-    image: qdrant/qdrant
+    volumes:
+      - qdrant_data:/qdrant/storage
     ports:
       - "6333:6333"
       - "6334:6334"
-    volumes:
-      - qdrant_data:/qdrant/storage
     networks:
       - django_network
 
@@ -41,6 +42,7 @@ services:
       - xpack.security.enabled=false
       - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - bootstrap.memory_lock=true
+      - http.host=0.0.0.0
     ulimits:
       memlock:
         soft: -1
@@ -53,15 +55,19 @@ services:
     networks:
       - django_network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9200" ]
+      test: ["CMD-SHELL", "curl -sS http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=30s || exit 1"]
       interval: 10s
-      timeout: 15s
+      timeout: 30s
       retries: 20
+      start_period: 30s
 
   web:
+    image: movie-vibe-test:latest
     build:
       context: .
       dockerfile: docker/Dockerfile
+      args:
+        REQUIREMENTS: ${REQUIREMENTS:-requirements.txt}
     container_name: django_web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
