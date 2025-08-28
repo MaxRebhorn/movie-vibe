@@ -1,5 +1,5 @@
 // src/services/api.js
-const BASE_URL = 'http://localhost:8000';
+export const BASE_URL = 'http://localhost:8000';
 
 // Helper function to get CSRF token for Django
 function getCSRFToken() {
@@ -68,16 +68,6 @@ export const authAPI = {
 // Movie-related API calls
 export const movieAPI = {
   search: (query) => {
-    return fetch(`http://localhost:8000/api/movies/search/?q=${encodeURIComponent(query)}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      });
-  },
-
-  searchAlt: (query) => {
     return apiFetch(`/api/movies/search/?q=${encodeURIComponent(query)}`);
   },
 

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import Navbar from '../../components/organisms/Navbar/Navbar';
 import MovieProfile from '../../components/organisms/MovieProfile/MovieProfile';
 import MovieGrid from "../../components/organisms/MovieGrid/MovieGrid";
+import { movieAPI } from '../../services/api'; // Import the service
 import styles from './MoviePage.module.css';
 
 function MoviePage() {
@@ -18,16 +19,12 @@ function MoviePage() {
             setLoading(true);
             try {
                 // Fetch main movie
-                const movieResponse = await fetch(`http://localhost:8000/api/movies/${id}/`);
-                if (!movieResponse.ok) throw new Error("Failed to fetch movie details");
-                const movieData = await movieResponse.json();
+                const movieData = await movieAPI.getMovie(id);
                 setMovie(movieData);
 
                 // Fetch similar movies
                 try {
-                    const similarResponse = await fetch(`http://localhost:8000/api/movies/${id}/similar/`);
-                    if (!similarResponse.ok) throw new Error("Failed to fetch similar movies");
-                    const similarData = await similarResponse.json();
+                    const similarData = await movieAPI.getSimilarMovies(id);
                     setSimilarMovies(similarData);
                 } catch {
                     // Fail gracefully for similar movies
