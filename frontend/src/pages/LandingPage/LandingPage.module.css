@@ -1,0 +1,22 @@
+.navbar {
+  width: 100vw;
+  margin-left: calc(-1 * 24px);
+  margin-right: calc(-1 * 24px);
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+}
+
+.error {
+    background-color: #fee;
+    color: #c33;
+    padding: 12px;
+    border: 1px solid #fcc;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-weight: 500;
+}

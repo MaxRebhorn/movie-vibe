@@ -1,0 +1,6 @@
+.poster {
+  width: auto;
+  height: auto;
+  object-fit: fill;
+  border-radius: 6px;
+}

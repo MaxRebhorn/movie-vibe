@@ -1,0 +1,12 @@
+.navbar {
+  width: 100vw;
+  margin-left: calc(-1 * 24px);
+  margin-right: calc(-1 * 24px);
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    margin-left: -16px;
+    margin-right: -16px;
+  }
+}

@@ -1,0 +1,56 @@
+// LandingPage.jsx (Updated)
+import React, {useState} from 'react';
+import Navbar from '../../components/organisms/Navbar/Navbar';
+import SearchSection from '../../components/organisms/SearchSection/SearchSection';
+import MovieGrid from '../../components/organisms/MovieGrid/MovieGrid';
+import { movieAPI } from '../../services/api'; // Import the service
+import styles from './LandingPage.module.css';
+
+function LandingPage() {
+    const [movies, setMovies] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSearch = async (query) => {
+        if (!query) return;
+        
+        setLoading(true);
+        setError('');
+        
+        try {
+            console.log("Searching for:", query);
+            const data = await movieAPI.search(query);
+            console.log("Search result:", data);
+            
+            // Handle different response formats
+            if (data.movies) {
+                setMovies(data.movies);
+            } else if (Array.isArray(data)) {
+                setMovies(data);
+            } else if (data.results) {
+                setMovies(data.results);
+            } else {
+                setMovies([]);
+            }
+        } catch (err) {
+            console.error("Search failed:", err);
+            setError(err.message || 'Search failed. Please try again.');
+            setMovies([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className={styles.container}>
+            <Navbar/>
+            <main className={styles.main}>
+                <SearchSection onSearch={handleSearch} loading={loading} />
+                {error && <div className={styles.error}>{error}</div>}
+                <MovieGrid movies={movies}/>
+            </main>
+        </div>
+    );
+}
+
+export default LandingPage;

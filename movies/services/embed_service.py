@@ -1,7 +1,7 @@
 from datetime import datetime
 from movies.models import Movie
 from sentence_transformers import SentenceTransformer
-from tags.services import get_tag_counts_for_movie  # Dein neuer Tagservice
+from tags.service import get_tag_counts_for_movie  # Dein neuer Tagservice
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -29,7 +29,7 @@ def embed_weighted_tags(tag_counts):
 
 def embed_model(movie):
     vibe_data = [movie.tagline, movie.genres, movie.composer, movie.language, movie.keywords]
-    narrative_data = [movie.plot or movie.synopsis]
+    narrative_data = [movie.plot_normalized or movie.synopsis]
     style_data = [movie.director, movie.cast, movie.release_date, movie.country]
 
     tag_counts = get_tag_counts_for_movie(movie)

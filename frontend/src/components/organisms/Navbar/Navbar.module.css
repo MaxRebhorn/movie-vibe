@@ -1,0 +1,57 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--bg-card);
+    height: 60px;
+    width: 100%;
+    z-index: 1000;
+     margin: 0;
+}
+
+.logo {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    max-width: 100%;
+    max-height: 200%;
+    object-fit: contain;
+    transition: 0.15s;
+    width: 55.5px;
+}
+
+.icon {
+    height: 100px;
+    width: auto;
+    max-height: 200%;
+    object-fit: contain;
+}
+
+.items {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.item {
+    padding: 0.5rem 1rem;
+}
+
+@media (max-width: 768px) {
+    .items {
+        gap: 16px;
+    }
+}
+/* Navbar.module.css */
+.icon {
+  width: 24px;      /* pick your desired size */
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;   /* prevents icons from shrinking */
+}
+

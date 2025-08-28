@@ -1,0 +1,41 @@
+.tag {
+    display: inline-block;
+    color: white; /* ensures text is readable */
+    font-weight: 500; /* optional: makes text look nicer */
+    line-height: 1; /* vertically centers text */
+    text-align: center;
+    white-space: nowrap; /* prevents line breaks inside tag */
+    border-color: var(--text-accent);
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    box-sizing: border-box;
+    display: inline-block;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    background-color: var(--text-muted);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+
+
+}
+
+.primary {
+    background-color: var(--primary);
+}
+
+.accent {
+    background-color: var(--text-muted);
+}
+
+.default {
+    padding: 4px 12px; /* more horizontal padding for oval shape */
+    border-radius: 999px; /* makes it fully rounded */
+    font-size: 14px;
+}
+
+.small {
+    padding: 2px 8px;
+    border-radius: 999px; /* same fully rounded */
+    font-size: 10px;
+}

@@ -1,0 +1,40 @@
+/* Heading.module.css */
+.heading {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.level1 {
+    font-size: 2rem;
+}
+
+.level2 {
+    font-size: 1.75rem;
+}
+
+.level3 {
+    font-size: 1.5rem;
+}
+
+.level4 {
+    font-size: 1.25rem;
+}
+
+.level5 {
+    font-size: 1.125rem;
+}
+
+.level6 {
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .level1 {
+        font-size: 1.75rem;
+    }
+
+    .level2 {
+        font-size: 1.5rem;
+    }
+}

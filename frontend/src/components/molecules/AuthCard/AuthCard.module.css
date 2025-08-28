@@ -1,0 +1,38 @@
+/* AuthCard.module.css */
+.authCard {
+    padding: 2.5rem;
+    background-color: var(--bg-card);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.title {
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-muted);
+}
+
+.body {
+    margin-bottom: 1.5rem;
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.link {
+    font-weight: 600;
+}
+
+@media (max-width: 480px) {
+    .authCard {
+        padding: 1.5rem;
+    }
+}
