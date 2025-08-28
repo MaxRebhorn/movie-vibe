@@ -1,6 +1,7 @@
 # users/views.py
 from django.contrib.auth import authenticate, login
 from rest_framework import generics, permissions, status
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -14,10 +15,13 @@ from .serializer import (  # Changed from relative import
     UserSerializer,
     UpdateUserSerializer
 )
+from django.http import JsonResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
 # === Create Account ===
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
 
 # === Login ===
 class LoginView(APIView):
@@ -89,3 +93,9 @@ class UserReviewListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Review.objects.filter(user=self.request.user).select_related('movie')
+
+
+
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    return JsonResponse({'detail': 'CSRF cookie set'})

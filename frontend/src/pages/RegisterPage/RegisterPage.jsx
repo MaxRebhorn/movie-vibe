@@ -1,8 +1,8 @@
 // RegisterPage.jsx
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import Navbar from '../../components/organisms/Navbar/Navbar';
 import RegisterForm from '../../components/organisms/RegisterForm/RegisterForm';
-import { authAPI } from '../../services/api';
+import {authAPI} from '../../services/api';
 import styles from './RegisterPage.module.css';
 
 function RegisterPage() {
@@ -19,30 +19,27 @@ function RegisterPage() {
             const response = await authAPI.register(formData);
             console.log('Registration successful:', response);
 
-            // Check if registration was successful
-            if (response.id || response.detail === "User created successfully") {
+            // ✅ Check if registration was successful based on returned fields
+            if (response.username) {
                 setDebugInfo(prev => prev + '\nRegistration successful! Redirecting...');
                 window.location.href = '/login';
             } else {
-                throw new Error(response.detail || 'Registration failed');
+                throw new Error('Registration failed');
             }
 
         } catch (error) {
             console.error('Registration failed:', error);
-            const errorMessage = error.message || 'Registration failed. Please try again.';
-            setError(errorMessage);
-            setDebugInfo(prev => prev + `\nError: ${errorMessage}`);
-
-            // Check for specific error types
-            if (error.message.includes('Failed to fetch')) {
-                setDebugInfo(prev => prev + '\nThis is a network error. Check:\n1. Django server is running\n2. CORS is configured\n3. No browser extensions blocking requests');
-            }
+            let fullError = typeof error === 'object' && error !== null
+                ? JSON.stringify(error, null, 2)
+                : error.message || String(error);
+            setError('Registration failed');
+            setDebugInfo(prev => prev + `\nError details:\n${fullError}`);
         }
     };
 
     return (
         <div className={styles.registerPage}>
-            <Navbar />
+            <Navbar/>
             <main className={styles.main}>
                 <div className={styles.container}>
                     <div className={styles.debugPanel}>
@@ -50,7 +47,7 @@ function RegisterPage() {
                         <pre>{debugInfo}</pre>
                     </div>
                     {error && <div className={styles.error}>{error}</div>}
-                    <RegisterForm onSubmit={handleRegister} />
+                    <RegisterForm onSubmit={handleRegister}/>
                 </div>
             </main>
         </div>

@@ -5,6 +5,8 @@ import IconButton from '../../molecules/IconButton/IconButton';
 import styles from './Navbar.module.css';
 import {Link} from "react-router-dom";
 import anim from "../../../styles/animation.module.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMoon, faSun, faUser, faPlus, faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 
 
 const Navbar = () => {
