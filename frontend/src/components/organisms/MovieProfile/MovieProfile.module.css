@@ -1,33 +1,93 @@
+/* MovieProfile.module.css */
+
 .container {
     display: flex;
+    gap: 40px; /* space between left and right columns */
+    padding: 40px 10%;
+    box-sizing: border-box;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
 }
 
 .leftColumn {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    flex: 2;
     display: flex;
     flex-direction: column;
-    padding-right: 15%;
-    padding-left: 10%;
-    transition: 0.15s;
-    height: 602.891px;
-    transform: translate(0px, 41px);
-    width: 724.117px;
+    gap: 20px; /* space between title, synopsis, video */
 }
 
 .rightColumn {
-    color: var(--text-primary);
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    padding-right: 5%;
-    transition: 0.15s;
-    height: 643.891px;
-    transform: translate(-60.5px, 41px);
-    width: 214.883px;
+    gap: 20px;
+    align-items: center; /* center everything inside */
 }
 
+/* Poster image styling */
+.rightColumn img {
+    width: 100%;
+    max-width: 250px; /* make poster a bit larger */
+    border-radius: 8px;
+    object-fit: cover;
+}
 
+/* Create a wrapper for all items below the poster */
+.rightColumnContent {
+    width: 100%; /* same as poster width */
+    max-width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+/* MovieMeta container */
+.MovieMeta {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+/* Cast tags container */
+.MovieCastList, .StreamingProviderList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center; /* center items */
+}
+
+/* Streaming provider icons */
+.StreamingProviderList img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 4px;
+    transition: transform 0.2s;
+}
+
+.StreamingProviderList img:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+/* VideoBox styling */
+.leftColumn iframe, .leftColumn video {
+    width: 100%;
+    max-height: 400px;
+    border-radius: 8px;
+    margin-top: 30px;
+}
+
+/* Movie title and synopsis */
+.MovieTitleContainer h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.MovieTitleContainer p {
+    font-size: 20px;
+    padding-left: 50px;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
