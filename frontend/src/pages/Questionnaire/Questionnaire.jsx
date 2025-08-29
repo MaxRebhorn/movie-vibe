@@ -15,7 +15,10 @@ export default function Questionnaire() {
   const [xpPopup, setXpPopup] = useState(null);
   const [movieResults, setMovieResults] = useState([]);
   const userId = "user-123"; // später dynamisch
-
+    const xpPerSet = {
+  novice: 5,
+  pro: 10
+};
   // Lade das richtige JSON basierend auf dem Set
   useEffect(() => {
   if (questionSet === "novice") {
@@ -47,7 +50,7 @@ export default function Questionnaire() {
       setAnswers({ ...answers, [id]: value });
       // Choice Fragen gehen sofort weiter
       if (type === "choice") {
-        awardXp(5);
+         awardXp(xpPerSet[questionSet]);
         setTimeout(() => setStep(step + 1), 300);
       }
     }
@@ -68,10 +71,10 @@ export default function Questionnaire() {
     setMovieResults([]);
   };
 
-  const handleNext = () => {
-    awardXp(5);
-    setStep(step + 1);
-  };
+const handleNext = () => {
+  awardXp(xpPerSet[questionSet]); // statt 5
+  setStep(step + 1);
+};
 
   const handleFinish = async () => {
     const payload = { userId, answers, xp };
