@@ -1,0 +1,116 @@
+.questionnaireContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg-card);
+  padding: 1rem;
+  color: var(--text-primary);
+  font-family: var(--font-family-inter);
+}
+
+.card {
+  background: var(--bg-dark);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 550px;
+  text-align: center;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+.questionTitle {
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.optionButton {
+  background: var(--bg-card);
+  border: 1px solid transparent;
+  padding: 0.9rem 1.3rem;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--text-primary);
+  transition: background 0.25s, color 0.25s, transform 0.15s, border-color 0.25s;
+}
+
+.optionButton:hover {
+  background: var(--border-accent);
+  color: var(--text-white);
+  transform: translateY(-2px);
+}
+
+.selected {
+  background: var(--text-accent);
+  border-color: var(--border-accent);
+  color: var(--text-white);
+  box-shadow: 0 0 8px rgba(217, 33, 44, 0.6);
+}
+
+.nextButton {
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.6rem;
+  border: none;
+  background: var(--text-accent);
+  color: var(--text-white);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.25s, transform 0.15s;
+}
+
+.nextButton:hover {
+  background: var(--border-accent);
+  transform: translateY(-2px);
+}
+
+.progressContainer {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+  color: var(--text-muted);
+}
+
+.progressbar {
+  width: 100%;
+  height: 12px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.progressbarFill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--text-accent), var(--text-primary));
+  box-shadow: 0 0 8px var(--text-accent);
+  transition: width 0.4s ease;
+}
+
+.xpPopup {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--text-accent);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  pointer-events: none;
+}
