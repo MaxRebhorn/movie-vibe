@@ -9,6 +9,12 @@ class UserProfile(models.Model):
         related_name='favorited_by',
         blank=True
     )
+    xp = models.IntegerField(default=0)
 
     def __str__(self):
         return self.user.username
+
+    @property
+    def level(self):
+        # Beispiel: jede 100 XP = 1 Level, hier leicht skalierbar
+        return self.xp // 100
