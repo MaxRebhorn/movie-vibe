@@ -1,22 +1,23 @@
 import React from 'react';
-import Text from '../Text/Text';
-import '../../../styles/colors.css';
 import styles from './Button.module.css';
 import anim from '../../../styles/animation.module.css';
 
-const Button = ({ children, variant = 'default', className = '', ...props }) => {
+const Button = ({
+  children,
+  variant = 'default',
+  onClick,
+  disabled = false,
+  type = 'button',
+  className = ''
+}) => {
   return (
     <button
-      className={`
-        ${styles.button}
-        ${styles[variant]}
-        ${anim.btnPress}
-        ${anim.hoverLift}
-        ${className}
-      `}
-      {...props}
+      type={type}
+      className={`${styles.button} ${styles[variant]} ${anim.btnPress} ${anim.hoverLift} ${className}`}
+      onClick={onClick}
+      disabled={disabled}
     >
-      <Text variant="button">{children}</Text>
+      {children}
     </button>
   );
 };

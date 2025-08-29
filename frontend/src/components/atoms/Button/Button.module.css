@@ -1,45 +1,61 @@
-/* Button.module.css (Fixed) */
 .button {
-    background: var(--bg-card);
-    border: 1px solid var(--border-accent);
-    border-radius: 6px;
-    padding: 0.75rem 1.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+  padding: 0.8rem 1.6rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.25s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.button:hover {
-    background: var(--text-accent);
-    border-color: var(--text-accent);
-}
-
-.button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* Variant styles */
 .primary {
-    background: var(--text-accent);
-    border-color: var(--text-accent);
-    color: white;
+  background: var(--text-accent);
+  color: var(--text-white);
 }
 
 .primary:hover {
-    background: rgba(217, 33, 44, 0.8);
-    border-color: rgba(217, 33, 44, 0.8);
+  background: var(--border-accent);
+  transform: translateY(-2px);
 }
 
 .secondary {
-    background: transparent;
-    border-color: var(--text-muted);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-accent);
 }
 
 .secondary:hover {
-    background: var(--text-muted);
-    border-color: var(--text-muted);
+  background: var(--border-accent);
+  color: var(--text-white);
+  transform: translateY(-2px);
+}
+
+.option {
+  background: var(--bg-card);
+  border: 1px solid transparent;
+  padding: 0.9rem 1.3rem;
+  border-radius: 14px;
+  color: var(--text-primary);
+  transition: background 0.25s, color 0.25s, transform 0.15s, border-color 0.25s;
+}
+
+.option:hover {
+  background: var(--border-accent);
+  color: var(--text-white);
+  transform: translateY(-2px);
+}
+
+.optionSelected {
+  background: var(--text-accent);
+  border-color: var(--border-accent);
+  color: var(--text-white);
+  box-shadow: 0 0 8px rgba(217, 33, 44, 0.6);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
 }

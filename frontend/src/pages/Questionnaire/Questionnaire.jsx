@@ -1,35 +1,39 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "../../components/organisms/Navbar/Navbar";
+import QuestionCard from "../../components/molecules/QuestionCard/QuestionCard";
+import Button from "../../components/atoms/Button/Button";
+import ProgressBar from "../../components/atoms/ProgressBar/ProgressBar";
 import styles from "./Questionnaire.module.css";
 import "../../styles/colors.css";
 import { movieAPI } from "../../services/api";
 import noviceQuestions from "../../data/novice_questions.json";
 import proQuestions from "../../data/pro_questions.json";
+
 export default function Questionnaire() {
-  const [questionSet, setQuestionSet] = useState("novice"); // novice | pro
+  const [questionSet, setQuestionSet] = useState("novice");
   const [questions, setQuestions] = useState([]);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [xp, setXp] = useState(0);
   const [xpPopup, setXpPopup] = useState(null);
   const [movieResults, setMovieResults] = useState([]);
-  const userId = "user-123"; // später dynamisch
-    const xpPerSet = {
-  novice: 5,
-  pro: 10
-};
-  // Lade das richtige JSON basierend auf dem Set
-  useEffect(() => {
-  if (questionSet === "novice") {
-    setQuestions(noviceQuestions);
-  } else {
-    setQuestions(proQuestions);
-  }
-  setStep(0);
-  setAnswers({});
-}, [questionSet]);
+  const userId = "user-123";
 
+  const xpPerSet = {
+    novice: 5,
+    pro: 10
+  };
+
+  useEffect(() => {
+    if (questionSet === "novice") {
+      setQuestions(noviceQuestions);
+    } else {
+      setQuestions(proQuestions);
+    }
+    setStep(0);
+    setAnswers({});
+  }, [questionSet]);
 
   const awardXp = (amount) => {
     setXp((prev) => prev + amount);
@@ -37,7 +41,15 @@ export default function Questionnaire() {
     setTimeout(() => setXpPopup(null), 1000);
   };
 
-  const handleSelect = (id, value, type) => {
+  const handleSelect = async (id, value, type) => {
+    if (type === "movie_input") {
+      setAnswers({ ...answers, [id]: value });
+      if (!value) return setMovieResults([]);
+      const res = await movieAPI.search(value);
+      setMovieResults(res || []);
+      return;
+    }
+
     if (type === "multi") {
       const current = answers[id] || [];
       setAnswers({
@@ -48,33 +60,26 @@ export default function Questionnaire() {
       });
     } else {
       setAnswers({ ...answers, [id]: value });
-      // Choice Fragen gehen sofort weiter
       if (type === "choice") {
-         awardXp(xpPerSet[questionSet]);
+        awardXp(xpPerSet[questionSet]);
         setTimeout(() => setStep(step + 1), 300);
       }
     }
   };
 
-  const handleTextChange = (id, value) =>
+  const handleTextChange = (id, value) => {
     setAnswers({ ...answers, [id]: value });
-
-  const handleMovieInput = async (query) => {
-    setAnswers({ ...answers, most_similar_movie: query });
-    if (!query) return setMovieResults([]);
-    const res = await movieAPI.search(query);
-    setMovieResults(res || []);
   };
 
-  const selectMovie = (title) => {
+  const handleMovieSelect = (title) => {
     setAnswers({ ...answers, most_similar_movie: title });
     setMovieResults([]);
   };
 
-const handleNext = () => {
-  awardXp(xpPerSet[questionSet]); // statt 5
-  setStep(step + 1);
-};
+  const handleNext = () => {
+    awardXp(xpPerSet[questionSet]);
+    setStep(step + 1);
+  };
 
   const handleFinish = async () => {
     const payload = { userId, answers, xp };
@@ -91,6 +96,7 @@ const handleNext = () => {
   };
 
   if (!questions.length) return null;
+
   const currentQuestion = questions[step];
   const progress = (step / questions.length) * 100;
 
@@ -101,90 +107,19 @@ const handleNext = () => {
         <div className={styles.card}>
           <AnimatePresence mode="wait">
             {currentQuestion ? (
-              <motion.div
-                key={currentQuestion.id}
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -40 }}
-                transition={{ duration: 0.4 }}
-              >
-                <h2 className={styles.questionTitle}>{currentQuestion.title}</h2>
+              <>
+                <QuestionCard
+                  question={currentQuestion}
+                  answers={answers}
+                  onSelect={handleSelect}
+                  onTextChange={handleTextChange}
+                  movieResults={movieResults}
+                  onMovieSelect={handleMovieSelect}
+                />
 
-                {/* Choice / Multi */}
-                {["choice", "multi"].includes(currentQuestion.type) && (
-                  <div className={styles.options}>
-                    {currentQuestion.options.map((opt) => (
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        key={opt}
-                        className={`${styles.optionButton} ${
-                          (Array.isArray(answers[currentQuestion.id])
-                            ? answers[currentQuestion.id].includes(opt)
-                            : answers[currentQuestion.id] === opt)
-                            ? styles.selected
-                            : ""
-                        }`}
-                        onClick={() =>
-                          handleSelect(
-                            currentQuestion.id,
-                            opt,
-                            currentQuestion.type
-                          )
-                        }
-                      >
-                        {opt}
-                      </motion.button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Text */}
-                {currentQuestion.type === "text" && (
-                  <>
-                    <textarea
-                      className={styles.textInput}
-                      value={answers[currentQuestion.id] || ""}
-                      onChange={(e) =>
-                        handleTextChange(currentQuestion.id, e.target.value)
-                      }
-                    />
-                  </>
-                )}
-
-                {/* Movie Autocomplete */}
-                {currentQuestion.type === "movie_select" && (
-                  <>
-                    <div className={styles.autocompleteContainer}>
-                      <input
-                        className={styles.autocompleteInput}
-                        value={answers[currentQuestion.id] || ""}
-                        onChange={(e) => handleMovieInput(e.target.value)}
-                        placeholder="Filmtitel eingeben..."
-                      />
-                      {movieResults.length > 0 && (
-                        <div className={styles.autocompleteDropdown}>
-                          {movieResults.map((movie) => (
-                            <div
-                              key={movie.id}
-                              className={styles.autocompleteItem}
-                              onClick={() => selectMovie(movie.title)}
-                            >
-                              {movie.title}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {/* Weiter Button */}
-                {["multi", "text", "movie_select"].includes(
-                  currentQuestion.type
-                ) && (
-                  <button
-                    className={styles.submitButton}
+                {["multi", "text", "movie_select"].includes(currentQuestion.type) && (
+                  <Button
+                    variant="primary"
                     onClick={handleNext}
                     disabled={
                       (currentQuestion.type === "multi" &&
@@ -193,76 +128,60 @@ const handleNext = () => {
                       (["text", "movie_select"].includes(currentQuestion.type) &&
                         !answers[currentQuestion.id])
                     }
+                    className={styles.submitButton}
                   >
                     Weiter
-                  </button>
+                  </Button>
+                )}
+              </>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className={styles.completionContainer}
+              >
+                <h2>Vielen Dank!</h2>
+                <p>Du hast <strong>{xp}</strong> XP gesammelt.</p>
+
+                {questionSet === "novice" ? (
+                  <>
+                    <p>Wenn du möchtest, kannst du noch detailliertere Fragen beantworten, um das beste Ergebnis zu erhalten.</p>
+                    <Button
+                      variant="primary"
+                      onClick={() => setQuestionSet("pro")}
+                      className={styles.nextButton}
+                    >
+                      Und jetzt noch etwas genauer
+                    </Button>
+                  </>
+                ) : (
+                  <p>Du hast nun das Profi-Questionnaire abgeschlossen.</p>
                 )}
 
-                {/* XP Popup */}
-                <AnimatePresence>
-                  {xpPopup && (
-                    <motion.div
-                      key={xpPopup.id}
-                      className={styles.xpPopup}
-                      initial={{ opacity: 0, y: 0 }}
-                      animate={{ opacity: 1, y: -50 }}
-                      exit={{ opacity: 0, y: -80 }}
-                      transition={{ duration: 1 }}
-                    >
-                      +{xpPopup.amount} XP
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <Button variant="primary" onClick={handleFinish}>
+                  Fertig
+                </Button>
               </motion.div>
-            ) : (
-                <motion.div
-                    initial={{opacity: 0, scale: 0.9}}
-                    animate={{opacity: 1, scale: 1}}
-                >
-                  <h2>Vielen Dank!</h2>
-                  <p>Du hast <strong>{xp}</strong> XP gesammelt.</p>
+            )}
+          </AnimatePresence>
 
-                  {questionSet === "novice" ? (
-                      <>
-                        <p>Wenn du möchtest, kannst du noch detailliertere Fragen beantworten, um das beste Ergebnis zu
-                          erhalten.</p>
-                        <button
-                            className={styles.nextButton}
-                            onClick={() => setQuestionSet("pro")}
-                        >
-                          Und jetzt noch etwas genauer
-                        </button>
-                      </>
-                  ) : (
-                      <p>Du hast nun das Profi-Questionnaire abgeschlossen.</p>
-                  )}
-
-                  <button className={styles.nextButton} >
-                    Fertig
-                  </button>
-                </motion.div>
-
+          <AnimatePresence>
+            {xpPopup && (
+              <motion.div
+                key={xpPopup.id}
+                className={styles.xpPopup}
+                initial={{ opacity: 0, y: 0 }}
+                animate={{ opacity: 1, y: -50 }}
+                exit={{ opacity: 0, y: -80 }}
+                transition={{ duration: 1 }}
+              >
+                +{xpPopup.amount} XP
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Progressbar */}
-        <div className={styles.progressContainer}>
-          <div className={styles.progressHeader}>
-            <span className="text-muted">
-              Frage {Math.min(step + 1, questions.length)} / {questions.length}
-            </span>
-            <span className="text-primary">{Math.round(progress)}%</span>
-          </div>
-          <div className={styles.progressbar}>
-            <motion.div
-                className={styles.progressbarFill}
-                initial={{width: 0}}
-                animate={{width: `${progress}%`}}
-                transition={{duration: 0.6, ease: "easeOut"}}
-            />
-          </div>
-        </div>
+        <ProgressBar progress={progress} />
       </div>
     </div>
   );
