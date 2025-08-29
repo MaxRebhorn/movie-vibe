@@ -6,8 +6,22 @@
   width: 100%;
   max-width: 550px;
   text-align: center;
+
+  min-height: 400px; /* feste Höhe nach längster Frage anpassen */
+  max-height: 600px; /* optional: für extrem lange Fragen */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Buttons unten halten, Inhalt oben */
+  position: relative; /* wichtig für absolute Kinder wie XP-Popup */
+  overflow: hidden; /* verhindert dass Card Layout sprengt */
 }
 
+.cardContent {
+  overflow-y: auto; /* scrollt nur den Inhalt, nicht die Card */
+  flex-grow: 1;
+}
+
+/* QuestionTitle, Options, Textarea, Autocomplete bleiben gleich */
 .questionTitle {
   font-size: 1.6rem;
   margin-bottom: 1.5rem;

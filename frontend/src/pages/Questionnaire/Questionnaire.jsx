@@ -22,7 +22,7 @@ export default function Questionnaire() {
 
   const xpPerSet = {
     novice: 5,
-    pro: 10
+    pro: 10,
   };
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function Questionnaire() {
       setAnswers({ ...answers, [id]: value });
       if (type === "choice") {
         awardXp(xpPerSet[questionSet]);
-        setTimeout(() => setStep(step + 1), 300);
+        setTimeout(() => setStep((prev) => prev + 1), 300);
       }
     }
   };
@@ -78,7 +78,8 @@ export default function Questionnaire() {
 
   const handleNext = () => {
     awardXp(xpPerSet[questionSet]);
-    setStep(step + 1);
+    setStep((prev) => prev + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" }); // optional: scroll oben
   };
 
   const handleFinish = async () => {
@@ -107,7 +108,14 @@ export default function Questionnaire() {
         <div className={styles.card}>
           <AnimatePresence mode="wait">
             {currentQuestion ? (
-              <>
+              <motion.div
+                key={currentQuestion.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                style={{ position: "relative" }}
+              >
                 <QuestionCard
                   question={currentQuestion}
                   answers={answers}
@@ -117,7 +125,9 @@ export default function Questionnaire() {
                   onMovieSelect={handleMovieSelect}
                 />
 
-                {["multi", "text", "movie_select"].includes(currentQuestion.type) && (
+                {["multi", "text", "movie_select"].includes(
+                  currentQuestion.type
+                ) && (
                   <Button
                     variant="primary"
                     onClick={handleNext}
@@ -125,7 +135,9 @@ export default function Questionnaire() {
                       (currentQuestion.type === "multi" &&
                         (!answers[currentQuestion.id] ||
                           answers[currentQuestion.id].length === 0)) ||
-                      (["text", "movie_select"].includes(currentQuestion.type) &&
+                      (["text", "movie_select"].includes(
+                        currentQuestion.type
+                      ) &&
                         !answers[currentQuestion.id])
                     }
                     className={styles.submitButton}
@@ -133,19 +145,25 @@ export default function Questionnaire() {
                     Weiter
                   </Button>
                 )}
-              </>
+              </motion.div>
             ) : (
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
                 className={styles.completionContainer}
               >
                 <h2>Vielen Dank!</h2>
-                <p>Du hast <strong>{xp}</strong> XP gesammelt.</p>
+                <p>
+                  Du hast <strong>{xp}</strong> XP gesammelt.
+                </p>
 
                 {questionSet === "novice" ? (
                   <>
-                    <p>Wenn du möchtest, kannst du noch detailliertere Fragen beantworten, um das beste Ergebnis zu erhalten.</p>
+                    <p>
+                      Wenn du möchtest, kannst du noch detailliertere Fragen
+                      beantworten, um das beste Ergebnis zu erhalten.
+                    </p>
                     <Button
                       variant="primary"
                       onClick={() => setQuestionSet("pro")}
@@ -165,6 +183,7 @@ export default function Questionnaire() {
             )}
           </AnimatePresence>
 
+          {/* XP-Popup */}
           <AnimatePresence>
             {xpPopup && (
               <motion.div
