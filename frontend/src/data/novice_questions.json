@@ -1,0 +1,8 @@
+[
+  {
+    "id": "most_similar_movie",
+    "title": "Welcher Film ist diesem am ähnlichsten?",
+    "type": "movie_select",
+    "options": ["Movie A", "Movie B", "Movie C"]
+  }
+]

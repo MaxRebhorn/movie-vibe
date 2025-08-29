@@ -114,3 +114,88 @@
   text-shadow: 0 2px 6px rgba(0,0,0,0.25);
   pointer-events: none;
 }
+.textInput {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-accent);
+  font-size: 1rem;
+  font-family: var(--font-family-inter);
+  resize: vertical;
+  margin-top: 1rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: border 0.25s, box-shadow 0.25s;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: var(--text-accent);
+  box-shadow: 0 0 8px var(--text-accent);
+}
+
+.autocompleteContainer {
+  position: relative;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.autocompleteInput {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-accent);
+  font-size: 1rem;
+  font-family: var(--font-family-inter);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  transition: border 0.25s, box-shadow 0.25s;
+}
+
+.autocompleteInput:focus {
+  outline: none;
+  border-color: var(--text-accent);
+  box-shadow: 0 0 8px var(--text-accent);
+}
+
+.autocompleteDropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: var(--bg-dark);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.autocompleteItem {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.autocompleteItem:hover {
+  background: var(--text-accent);
+  color: var(--text-white);
+}
+
+.submitButton {
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.6rem;
+  border: none;
+  background: var(--text-accent);
+  color: var(--text-white);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.25s, transform 0.15s;
+}
+
+.submitButton:hover {
+  background: var(--border-accent);
+  transform: translateY(-2px);
+}
