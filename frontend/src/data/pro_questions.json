@@ -3,103 +3,121 @@
     "id": "cinematic_vibe_energy",
     "title": "Wie würden Sie die kinetische Energie des Films beschreiben?",
     "type": "choice",
-    "options": ["meditativ", "kontrolliert dynamisch", "hochfrequent", "überwältigend intensiv"]
+    "options": ["meditativ", "kontrolliert dynamisch", "hochfrequent", "überwältigend intensiv"],
+    "vector_type": "vibe"
   },
   {
     "id": "emotional_palette",
     "title": "Welche emotionale Farbpalette dominiert die Erzählung?",
     "type": "multi",
-    "options": ["euphorisch", "melancholisch", "beklemmend", "suspenseful", "lyrisch", "dystopisch", "transzendent"]
+    "options": ["euphorisch", "melancholisch", "beklemmend", "suspenseful", "lyrisch", "dystopisch", "transzendent"],
+    "vector_type": "vibe"
   },
   {
     "id": "mise_en_scene",
     "title": "Wie charakterisieren Sie die mise-en-scène?",
     "type": "choice",
-    "options": ["minimalistisch", "opulent", "naturalistisch", "stilisiert", "expressionistisch"]
+    "options": ["minimalistisch", "opulent", "naturalistisch", "stilisiert", "expressionistisch"],
+    "vector_type": "style"
   },
   {
     "id": "visual_metaphor",
     "title": "Welche visuellen Metaphern fallen besonders auf?",
-    "type": "text"
+    "type": "text",
+    "vector_type": "style"
   },
   {
     "id": "color_grading",
     "title": "Wie ist der Color-Grading-Ansatz?",
     "type": "multi",
-    "options": ["desaturiert", "high contrast", "monochrom", "warmtonig", "kalttonig", "teal-orange", "vintage"]
+    "options": ["desaturiert", "high contrast", "monochrom", "warmtonig", "kalttonig", "teal-orange", "vintage"],
+    "vector_type": "style"
   },
   {
     "id": "cinematography_style",
     "title": "Welche cinematographischen Stile dominieren?",
     "type": "multi",
-    "options": ["planimetrisch", "deep focus", "shallow depth", "Steadicam", "handheld verité", "crane shots", "dolly zooms"]
+    "options": ["planimetrisch", "deep focus", "shallow depth", "Steadicam", "handheld verité", "crane shots", "dolly zooms"],
+    "vector_type": "style"
   },
   {
     "id": "editing_rhythm",
     "title": "Wie beschreiben Sie den Editing-Rhythmus?",
     "type": "choice",
-    "options": ["eisensteinisch montiert", "bazinisch lang", "pulsierend", "fragmentarisch", "hypnotisch"]
+    "options": ["eisensteinisch montiert", "bazinisch lang", "pulsierend", "fragmentarisch", "hypnotisch"],
+    "vector_type": "style"
   },
   {
     "id": "sound_design",
     "title": "Welche Klangebene ist besonders hervorzuheben?",
     "type": "multi",
-    "options": ["diagetisch dominant", "non-diagetisch expressive", "soundscape-orientiert", "stillebetont", "foley-artistisch"]
+    "options": ["diagetisch dominant", "non-diagetisch expressive", "soundscape-orientiert", "stillebetont", "foley-artistisch"],
+    "vector_type": "style"
   },
   {
     "id": "narrative_structure",
     "title": "Welche narrative Struktur liegt vor?",
     "type": "choice",
-    "options": ["dreiaktig klassisch", "episodisch", "non-linear", "ray-geschichtet", "kaleidoskopisch"]
+    "options": ["dreiaktig klassisch", "episodisch", "non-linear", "ray-geschichtet", "kaleidoskopisch"],
+    "vector_type": "narrative"
   },
   {
     "id": "thematic_depth",
     "title": "Welche philosophischen/thematischen Tiefen werden erkundet?",
     "type": "multi",
-    "options": ["existentialistisch", "sozialkritisch", "psychoanalytisch", "existentialistisch", "metafiktional", "polit-allegorisch"]
+    "options": ["existentialistisch", "sozialkritisch", "psychoanalytisch", "existentialistisch", "metafiktional", "polit-allegorisch"],
+    "vector_type": "narrative"
   },
   {
     "id": "character_arc",
     "title": "Wie gestaltet sich der Charakterbogen?",
     "type": "choice",
-    "options": ["transformativ", "tragisch", "stationär", "fragmentarisch", "kollektiv"]
+    "options": ["transformativ", "tragisch", "stationär", "fragmentarisch", "kollektiv"],
+    "vector_type": "narrative"
   },
   {
     "id": "pacing_tempo",
     "title": "Wie ist das narrative Tempo strukturiert?",
     "type": "choice",
-    "options": ["andante", "accelerando", "rubato", "crescendo", "staccato"]
+    "options": ["andante", "accelerando", "rubato", "crescendo", "staccato"],
+    "vector_type": "narrative"
   },
   {
     "id": "directorial_voice",
     "title": "Wie würden Sie die autoriale Handschrift beschreiben?",
-    "type": "text"
+    "type": "text",
+    "vector_type": "style"
   },
   {
     "id": "intertextual_references",
     "title": "Welche intertextuellen Referenzen sind erkennbar?",
-    "type": "text"
+    "type": "text",
+    "vector_type": "narrative"
   },
   {
     "id": "genre_subversion",
     "title": "Werden Genre-Konventionen unterlaufen oder dekonstruiert?",
     "type": "choice",
-    "options": ["konventionell", "subversiv", "postmodern", "genre-hybrid", "transmedial"]
+    "options": ["konventionell", "subversiv", "postmodern", "genre-hybrid", "transmedial"],
+    "vector_type": "narrative"
   },
   {
     "id": "cultural_context",
     "title": "Wie positioniert sich der Film im kulturellen/historischen Kontext?",
-    "type": "text"
+    "type": "text",
+    "vector_type": "narrative"
   },
   {
     "id": "auteur_touch",
     "title": "Welche auteuristischen Signaturen sind erkennbar?",
     "type": "multi",
-    "options": ["visuelle Leitmotive", "wiederkehrende Themen", "stilistische Kontinuität", "collaborative Wiederholung"]
+    "options": ["visuelle Leitmotive", "wiederkehrende Themen", "stilistische Kontinuität", "collaborative Wiederholung"],
+    "vector_type": "style"
   },
   {
     "id": "critical_analysis",
     "title": "Was ist Ihre kritische Gesamtanalyse des Werks?",
-    "type": "text"
+    "type": "text",
+    "vector_type": "narrative"
   }
 ]

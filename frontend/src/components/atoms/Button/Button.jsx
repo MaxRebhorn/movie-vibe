@@ -8,12 +8,20 @@ const Button = ({
   onClick,
   disabled = false,
   type = 'button',
-  className = ''
+  className = '',
+  selected = false, // NEU: markiert ausgewählte Optionen
 }) => {
   return (
     <button
       type={type}
-      className={`${styles.button} ${styles[variant]} ${anim.btnPress} ${anim.hoverLift} ${className}`}
+      className={`
+        ${styles.button} 
+        ${styles[variant]} 
+        ${selected ? styles.optionSelected : ''} 
+        ${anim.btnPress} 
+        ${anim.hoverLift} 
+        ${className}
+      `}
       onClick={onClick}
       disabled={disabled}
     >

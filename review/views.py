@@ -16,3 +16,4 @@ class MovieReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         movie = get_object_or_404(Movie, pk=self.kwargs['movie_id'])
         serializer.save(user=self.request.user, movie=movie)
+
