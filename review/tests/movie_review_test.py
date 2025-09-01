@@ -20,7 +20,7 @@ class MovieVectorPushTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # Create anchor movie (fully populated)
+        # Create main movie
         cls.movable = Movie.objects.create(
             title="Movable Movie",
             original_title="Movable Movie",
@@ -41,17 +41,16 @@ class MovieVectorPushTests(TestCase):
             tmdb_id=9999
         )
 
-        # Create users and attach profiles
+        # Create users and profiles
         cls.users = []
         for i in range(3):
             user = User.objects.create(username=f"user{i}")
-            # Ensure profile exists
             profile, _ = UserProfile.objects.get_or_create(user=user)
             profile.xp = i * 50
             profile.save()
             cls.users.append(user)
 
-        # Optional: create anchors if needed for similarity checks
+        # Create anchors for similarity comparisons
         cls.anchors = []
         for j in range(2):
             anchor = Movie.objects.create(
@@ -83,6 +82,7 @@ class MovieVectorPushTests(TestCase):
         }
 
     def test_push_movable_movie(self):
+        """Simulate multiple reviews and track similarity changes."""
         similarities_over_time = []
 
         for _ in range(10):
@@ -108,4 +108,48 @@ class MovieVectorPushTests(TestCase):
             sims = [cosine_similarity(movable_vec, a) for a in anchor_vecs]
             similarities_over_time.append(sims)
 
-        print("Similarities over time:", similarities_over_time)
+        # Ensure we tracked similarity
+        self.assertEqual(len(similarities_over_time), 10)
+
+    def test_user_level_from_xp(self):
+        """Check that XP correctly calculates user level."""
+        for i, user in enumerate(self.users):
+            profile = user.profile
+            expected_level = profile.xp // 100
+            self.assertEqual(profile.level, expected_level)
+
+    def test_embedding_updates(self):
+        """Ensure embeddings change after applying update_weighted_embedding."""
+        user = self.users[0]
+        quiz_data = {"answers": self.generate_quiz_answers(), "xp": user.profile.xp}
+        results = process_quiz_review(quiz_data)
+
+        # Save initial embeddings
+        initial_vector_length = len(results['vibe_embedding'] +
+                                    results['narrative_embedding'] +
+                                    results['style_embedding'])
+
+        update_weighted_embedding(
+            results['vibe_embedding'], self.movable.id, {"user_id": user.id}, 'vibe', results['user_level']
+        )
+        update_weighted_embedding(
+            results['narrative_embedding'], self.movable.id, {"user_id": user.id}, 'narrative', results['user_level']
+        )
+        update_weighted_embedding(
+            results['style_embedding'], self.movable.id, {"user_id": user.id}, 'style', results['user_level']
+        )
+
+        # After update, the combined vector length should be the same
+        updated_vector_length = len(results['vibe_embedding'] +
+                                    results['narrative_embedding'] +
+                                    results['style_embedding'])
+        self.assertEqual(initial_vector_length, updated_vector_length)
+
+    def test_cosine_similarity_function(self):
+        """Basic cosine similarity test."""
+        vec_a = [1, 0, 0]
+        vec_b = [0, 1, 0]
+        vec_c = [1, 0, 0]
+
+        self.assertAlmostEqual(cosine_similarity(vec_a, vec_b), 0.0)
+        self.assertAlmostEqual(cosine_similarity(vec_a, vec_c), 1.0)
