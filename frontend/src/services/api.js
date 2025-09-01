@@ -69,3 +69,15 @@ export const movieAPI = {
   getSimilarMovies: (id) =>
     apiFetch(`/api/movies/${id}/similar/`),
 };
+
+// Questionnaire-related API calls
+export const questionnaireAPI = {
+  submitQuestionnaire: (movieId, payload) =>
+    apiFetch(`/api/movies/${movieId}/review/`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+
+  getQuestionnaire: (movieId) =>
+    apiFetch(`/api/movies/${movieId}/review/`),
+};

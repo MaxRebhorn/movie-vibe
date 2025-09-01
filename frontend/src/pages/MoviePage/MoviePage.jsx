@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Navbar from '../../components/organisms/Navbar/Navbar';
 import MovieProfile from '../../components/organisms/MovieProfile/MovieProfile';
 import MovieGrid from "../../components/organisms/MovieGrid/MovieGrid";
 import { movieAPI } from '../../services/api'; // Import the service
 import styles from './MoviePage.module.css';
+import IconButton from "../../components/molecules/IconButton/IconButton";
+import Icon from "../../components/atoms/Icon/Icon";
+import anim from "../../styles/animation.module.css";
 
 function MoviePage() {
     const { id } = useParams();
@@ -13,6 +16,9 @@ function MoviePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [similarError, setSimilarError] = useState(false);
+
+    // TEMP: replace with your ThemeContext or prop later
+    const theme = 'light';
 
     useEffect(() => {
         async function fetchMovieAndSimilar() {
@@ -50,7 +56,7 @@ function MoviePage() {
 
     return (
         <div className={styles.container}>
-            <Navbar/>
+            <Navbar />
             <main className={styles.main}>
                 <MovieProfile
                     title={movie.title}
@@ -63,11 +69,23 @@ function MoviePage() {
                     streaming_providers={movie.streaming_providers}
                 />
 
+                <Link to={`/movies/${id}/review`} className={`
+                    ${styles.linkWrapper}
+                    ${anim.btnPress}
+                    ${anim.hoverGlow}
+                    ${anim.hoverZoom}
+                `}>
+                    <Icon
+                        name={theme !== 'dark' ? 'review_light.svg' : 'review.svg'}
+                        className={styles.icon}
+                    />
+                </Link>
+
                 <h2>Similar Movies</h2>
                 {similarError || similarMovies.length === 0 ? (
                     <p>No similar movies found.</p>
                 ) : (
-                    <MovieGrid movies={similarMovies}/>
+                    <MovieGrid movies={similarMovies} />
                 )}
             </main>
         </div>

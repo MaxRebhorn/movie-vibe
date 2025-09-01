@@ -6,11 +6,13 @@ import Button from "../../components/atoms/Button/Button";
 import ProgressBar from "../../components/atoms/ProgressBar/ProgressBar";
 import styles from "./Questionnaire.module.css";
 import "../../styles/colors.css";
-import {movieAPI} from "../../services/api";
+import {movieAPI, questionnaireAPI} from "../../services/api";
 import noviceQuestions from "../../data/novice_questions.json";
 import proQuestions from "../../data/pro_questions.json";
+import { useParams } from "react-router-dom";
 
 export default function Questionnaire() {
+    const { id: movieId } = useParams();
     const [questionSet, setQuestionSet] = useState("novice");
     const [questions, setQuestions] = useState([]);
     const [step, setStep] = useState(0);
@@ -18,7 +20,10 @@ export default function Questionnaire() {
     const [xp, setXp] = useState(0);
     const [xpPopup, setXpPopup] = useState(null);
     const [movieResults, setMovieResults] = useState([]);
-    const userId = "user-123";
+
+    // Hardcoded user ID for testing - remove this in production!
+    const userId = "test-user-123";
+    const isDebugMode = true; // Set to false in production
 
     const xpPerSet = {
         novice: 5,
@@ -82,17 +87,17 @@ export default function Questionnaire() {
     const handleNext = () => {
         awardXp(xpPerSet[questionSet]);
         setStep((prev) => prev + 1);
-        window.scrollTo({top: 0, behavior: "smooth"}); // optional: scroll oben
+        window.scrollTo({top: 0, behavior: "smooth"});
     };
 
     const handleFinish = async () => {
-        const payload = {userId, answers, xp};
+        // For testing: include user ID in payload
+        const payload = isDebugMode
+            ? { answers, debug_user_id: userId, xp }
+            : { answers };
+
         try {
-            await fetch("/api/submit-questionnaire", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(payload),
-            });
+            await questionnaireAPI.submitQuestionnaire(movieId, payload);
             console.log("Daten gesendet:", payload);
         } catch (err) {
             console.error("API-Error:", err);

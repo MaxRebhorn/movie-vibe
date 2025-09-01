@@ -1,0 +1,61 @@
+{
+    "userId": "user-123",
+    "answers": {
+        "vibe_weather": "sonnig und warm",
+        "style_wes_anderson": "symmetrisch & stilisiert",
+        "narrative_main_character": "Antiheld",
+        "vibe_party": "mysteriöses Maskenball",
+        "style_camera": {
+            "values": [
+                "Steadicam"
+            ],
+            "vector_type": "style"
+        },
+        "narrative_structure": "überraschend / twist-heavy",
+        "vibe_color": "kalt & distanziert",
+        "style_lighting": "stilisiert / bewusst artifiziell",
+        "narrative_tropes": {
+            "values": [
+                "Antiheldenreise"
+            ],
+            "vector_type": "narrative"
+        },
+        "style_sound_instruments": {
+            "values": [
+                "Schlagzeug / Percussion"
+            ],
+            "vector_type": "style"
+        },
+        "vibe_intensity": "sehr intensiv",
+        "fun_drink": "heiße Schokolade",
+        "style_composition": "opulent & dekorativ",
+        "narrative_character_development": "bleibt gleich",
+        "vibe_emotion": {
+            "values": [
+                "Angst",
+                "Wut"
+            ],
+            "vector_type": "vibe"
+        },
+        "style_sound": {
+            "values": [
+                "spannend / suspenseful"
+            ],
+            "vector_type": "style"
+        },
+        "narrative_pacing": "wechselhaft",
+        "style_prominent_colors": {
+            "values": [
+                "Pastelltöne",
+                "Neonfarben"
+            ],
+            "vector_type": "style"
+        },
+        "fun_rollercoaster": "total unvorhersehbar",
+        "open_analysis": "eeee",
+        "vibe_texture": "weich & flauschig",
+        "style_colorgrading": "kalttonig",
+        "most_similar_movie": "Top Gun"
+    },
+    "xp": 115
+}

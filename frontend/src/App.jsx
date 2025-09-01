@@ -16,7 +16,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
           <Route path="/user" element={<UserPage />} />
-           <Route path="/test" element={<Questionnaire />} />
+           <Route path="/movies/:id/review" element={<Questionnaire />} />
         {/* Example of other routes */}
         {/* <Route path="/about" element={<About />} /> */}
         {/* <Route path="/contact" element={<Contact />} /> */}

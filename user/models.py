@@ -14,6 +14,9 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
+
+    def give_xp(self,xp):
+        self.xp += xp
     @property
     def level(self):
         # Beispiel: jede 100 XP = 1 Level, hier leicht skalierbar

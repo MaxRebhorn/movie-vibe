@@ -14,13 +14,15 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+# review/urls.py
 from django.urls import path
-from .views import MovieReviewViewSet
-
-review_create = MovieReviewViewSet.as_view({'post': 'create'})
-review_list = MovieReviewViewSet.as_view({'get': 'list'})
+from review.views import MovieQuizReviewViewSet
 
 urlpatterns = [
-    path('movies/<int:movie_id>/reviews/', review_list, name='movie-review-list'),
-    path('movies/<int:movie_id>/reviews/create/', review_create, name='movie-review-create'),
+    path(
+        'movies/<int:movie_id>/review',
+        MovieQuizReviewViewSet.as_view({'post': 'submit_quiz_review'}),
+        name='movie-review-submit'
+    ),
 ]
+
