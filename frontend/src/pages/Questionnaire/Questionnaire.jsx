@@ -9,10 +9,12 @@ import "../../styles/colors.css";
 import {movieAPI, questionnaireAPI} from "../../services/api";
 import noviceQuestions from "../../data/novice_questions.json";
 import proQuestions from "../../data/pro_questions.json";
-import { useParams } from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
+import anim from "../../styles/animation.module.css";
+import Icon from "../../components/atoms/Icon/Icon";
 
 export default function Questionnaire() {
-    const { id: movieId } = useParams();
+    const {id: movieId} = useParams();
     const [questionSet, setQuestionSet] = useState("novice");
     const [questions, setQuestions] = useState([]);
     const [step, setStep] = useState(0);
@@ -93,14 +95,14 @@ export default function Questionnaire() {
     const handleFinish = async () => {
         // For testing: include user ID in payload
         const payload = isDebugMode
-            ? { answers, debug_user_id: userId, xp }
-            : { answers };
+            ? {answers, debug_user_id: userId, xp}
+            : {answers};
 
         try {
             await questionnaireAPI.submitQuestionnaire(movieId, payload);
-            console.log("Daten gesendet:", payload);
+            console.log("Data sent:", payload);
         } catch (err) {
-            console.error("API-Error:", err);
+            console.error("API Error:", err);
         }
     };
 
@@ -150,7 +152,7 @@ export default function Questionnaire() {
                                         }
                                         className={styles.submitButton}
                                     >
-                                        Weiter
+                                        Next
                                     </Button>
                                 )}
                             </motion.div>
@@ -161,32 +163,34 @@ export default function Questionnaire() {
                                 exit={{opacity: 0}}
                                 className={styles.completionContainer}
                             >
-                                <h2>Vielen Dank!</h2>
+                                <h2>Thank you!</h2>
                                 <p>
-                                    Du hast <strong>{xp}</strong> XP gesammelt.
+                                    You've collected <strong>{xp}</strong> XP.
                                 </p>
 
                                 {questionSet === "novice" ? (
                                     <>
                                         <p>
-                                            Wenn du möchtest, kannst du noch detailliertere Fragen
-                                            beantworten, um das beste Ergebnis zu erhalten.
+                                            If you want, you can answer more detailed questions
+                                            to get the best result.
                                         </p>
                                         <Button
                                             variant="primary"
                                             onClick={() => setQuestionSet("pro")}
                                             className={styles.nextButton}
                                         >
-                                            Und jetzt noch etwas genauer
+                                            And now a bit more detailed
                                         </Button>
                                     </>
                                 ) : (
-                                    <p>Du hast nun das Profi-Questionnaire abgeschlossen.</p>
+                                    <p>You have now completed the pro questionnaire.</p>
                                 )}
 
-                                <Button variant="primary" onClick={handleFinish}>
-                                    Fertig
-                                </Button>
+                                <Link to={`/movies/${movieId}`} className={`${styles.linkWrapper} ${anim.btnPress} ${anim.hoverGlow} ${anim.hoverZoom}`}>
+                                    <Button variant="primary" onClick={handleFinish}>
+                                        Finish
+                                    </Button>
+                                </Link>
                             </motion.div>
                         )}
                     </AnimatePresence>

@@ -1,4 +1,5 @@
-# Add these imports
+
+
 import traceback
 from datetime import datetime
 
@@ -8,23 +9,21 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from movies.models import Movie
-from .models import MovieQuizReview
+from .models import MovieQuizReview, VectorHistory
 from review.services.embed_review import process_quiz_review
-from review.services.vector_review import update_weighted_embedding
+from review.services.vector_review import remove_review_influence, update_weighted_embedding
 
 import json
 import logging
 
 from .serializer import ReviewSerializer
 
-# Set up logging
 logger = logging.getLogger(__name__)
 
 
-# Add this view to views.py
 class MovieQuizReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [permissions.AllowAny]  # Temporarily allow any for testing
+    permission_classes = [permissions.AllowAny]
 
     @action(detail=True, methods=['post'])
     def submit_quiz_review(self, request, movie_id=None):
@@ -45,9 +44,16 @@ class MovieQuizReviewViewSet(viewsets.ModelViewSet):
                 )
                 logger.info(f"👤 Using debug user: {user.username} (created: {created})")
 
+            existing_review = MovieQuizReview.objects.filter(user=user, movie=movie).first()
+            if existing_review:
+                logger.info(f"🔄 User already has a review. Removing old review influence.")
+                remove_review_influence(existing_review, movie.id)
+                existing_review.delete()
+                logger.info(f"🗑️ Old review deleted.")
+
             quiz_data = request.data
             if 'answers' not in quiz_data:
-                logger.warning("⚠️ No 'answers' key found in quiz data")
+                logger.warning("⚠️ No 'answers' key in quiz data")
                 return Response({'error': 'Missing answers data'}, status=status.HTTP_400_BAD_REQUEST)
 
             results = process_quiz_review(quiz_data)
@@ -60,17 +66,15 @@ class MovieQuizReviewViewSet(viewsets.ModelViewSet):
             xp = quiz_data.get('xp', 0)
             logger.info(f"⭐ XP to award: {xp}")
 
-            quiz_review, created = MovieQuizReview.objects.update_or_create(
+            quiz_review = MovieQuizReview.objects.create(
                 user=user,
                 movie=movie,
-                defaults={
-                    'answers': quiz_data['answers'],
-                    'vibe_embedding': results['vibe_embedding'],
-                    'narrative_embedding': results['narrative_embedding'],
-                    'style_embedding': results['style_embedding']
-                }
+                answers=quiz_data['answers'],
+                vibe_embedding=results['vibe_embedding'],
+                narrative_embedding=results['narrative_embedding'],
+                style_embedding=results['style_embedding']
             )
-            logger.info(f"💾 Quiz review {'created' if created else 'updated'}: {quiz_review.id}")
+            logger.info(f"💾 New quiz review created: {quiz_review.id}")
 
             payload = {
                 'movie_id': movie.id,
@@ -81,11 +85,10 @@ class MovieQuizReviewViewSet(viewsets.ModelViewSet):
             }
             logger.info(f"📦 Vector DB payload: {payload}")
 
-            # Update vectors safely
             for emb_type in ['vibe', 'narrative', 'style']:
                 embedding = results.get(f'{emb_type}_embedding')
-                if not embedding:  # empty list or None
-                    logger.warning(f"⚠️ {emb_type} embedding is empty or missing, skipping vector DB update")
+                if not embedding:
+                    logger.warning(f"⚠️ {emb_type} embedding missing, skipping vector DB update")
                     continue
                 try:
                     update_weighted_embedding(
@@ -100,6 +103,28 @@ class MovieQuizReviewViewSet(viewsets.ModelViewSet):
                     logger.error(f"❌ Vector DB error for {emb_type}: {str(e)}")
                     return Response({'error': f'Vector DB update failed for {emb_type}: {str(e)}'},
                                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # Update vector_effect per type
+            for emb_type in ['vibe', 'narrative', 'style']:
+                embedding = results.get(f'{emb_type}_embedding')
+                if not embedding:
+                    continue
+                if f'{emb_type}_effect' not in quiz_review.vector_effect:
+                    quiz_review.vector_effect[f'{emb_type}_effect'] = embedding
+
+            quiz_review.user_level_at_review = results['user_level']
+            quiz_review.save()
+
+            # Create combined vector history snapshot
+            VectorHistory.objects.create(
+                movie=movie,
+                vibe_vector=results['vibe_embedding'],
+                narrative_vector=results['narrative_embedding'],
+                style_vector=results['style_embedding'],
+                source_id=quiz_review.id,
+                change_source='review',
+                description=f"Review by {user.username} (Level: {results['user_level']})"
+            )
 
             response_data = {
                 'status': 'quiz review submitted',

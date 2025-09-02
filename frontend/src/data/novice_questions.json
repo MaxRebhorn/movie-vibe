@@ -1,9 +1,173 @@
 [
   {
     "id": "vibe_weather",
-    "title": "Wenn der Film ein Wetter wäre, wie würde es sich anfühlen?",
+    "title": "If this movie were a type of weather, what would it feel like?",
     "type": "choice",
-    "options": ["sonnig und warm", "stürmisch und chaotisch", "neblig und geheimnisvoll", "kalt und klar"],
+    "options": ["sunny and warm", "stormy and chaotic", "foggy and mysterious", "cold and clear"],
+    "vector_type": "vibe"
+  },
+  {
+    "id": "style_wes_anderson",
+    "title": "How would you describe the visual style – more minimalist symmetry like Wes Anderson or more chaotic/realistic?",
+    "type": "choice",
+    "options": ["symmetrical & stylized", "colorful & playful", "realistic & dynamic", "dark & dramatic"],
+    "vector_type": "style"
+  },
+  {
+    "id": "narrative_main_character",
+    "title": "What kind of main character is at the center of this movie?",
+    "type": "choice",
+    "options": ["Hero", "Anti-hero", "Mentor", "Sidekick", "Collective / Ensemble"],
+    "vector_type": "narrative"
+  },
+  {
+    "id": "vibe_party",
+    "title": "If this movie were a party, what kind of party would it be?",
+    "type": "choice",
+    "options": ["cozy evening with friends", "raucous dance party", "mysterious masquerade ball", "lonely night on the couch"],
+    "vector_type": "vibe"
+  },
+  {
+    "id": "style_camera",
+    "title": "Which camera types dominate in this movie?",
+    "type": "multi",
+    "options": ["Close-ups", "Wide-angle", "Handheld camera", "Steadicam", "Slow motion", "Static shots"],
+    "vector_type": "style"
+  },
+  {
+    "id": "narrative_structure",
+    "title": "How would you describe this movie's story structure?",
+    "type": "choice",
+    "options": ["clearly linear", "episodic / multiple plotlines", "surprising / twist-heavy", "non-linear / experimental"],
+    "vector_type": "narrative"
+  },
+  {
+    "id": "vibe_color",
+    "title": "Which color best describes the overall impression of this movie?",
+    "type": "choice",
+    "options": ["bright & cheerful", "dark & mysterious", "warm & cozy", "cold & distant"],
+    "vector_type": "vibe"
+  },
+  {
+    "id": "style_lighting",
+    "title": "How is the lighting design in this movie?",
+    "type": "choice",
+    "options": ["bright & friendly", "dark & moody", "high contrast", "stylized / deliberately artificial"],
+    "vector_type": "style"
+  },
+  {
+    "id": "narrative_tropes",
+    "title": "Which story tropes stand out in this movie?",
+    "type": "multi",
+    "options": ["Revenge", "Coming-of-Age", "Quest", "Love & Friendship", "Anti-hero's journey", "Mystery/Detective"],
+    "vector_type": "narrative"
+  },
+  {
+    "id": "style_sound_instruments",
+    "title": "Which instruments or sound sources stand out particularly in this movie's soundtrack?",
+    "type": "multi",
+    "options": [
+      "Strings (violin, cello, etc.)",
+      "Wind instruments (trumpet, saxophone, etc.)",
+      "Piano / Keyboard",
+      "Drums / Percussion",
+      "Electronic sounds / Synthesizer",
+      "Choir / Vocals",
+      "Guitar / Bass",
+      "Sound effects / Foley",
+      "Full orchestra",
+      "Minimalist solo instruments"
+    ],
+    "vector_type": "style"
+  },
+  {
+    "id": "vibe_intensity",
+    "title": "How intense is this movie?",
+    "type": "choice",
+    "options": ["calm", "moderately moving", "dynamic", "very intense"],
+    "vector_type": "vibe"
+  },
+  {
+    "id": "fun_drink",
+    "title": "If this movie were a drink, which one would it be?",
+    "type": "choice",
+    "options": ["hot chocolate", "espresso", "cocktail with a little umbrella", "strong whiskey"],
+    "vector_type": "vibe"
+  },
+  {
+    "id": "style_composition",
+    "title": "How would you describe this movie's image composition?",
+    "type": "choice",
+    "options": ["symmetrical & tidy", "chaotic & dynamic", "minimalist", "opulent & decorative"],
+    "vector_type": "style"
+  },
+  {
+    "id": "narrative_character_development",
+    "title": "How does the main character develop in this movie?",
+    "type": "choice",
+    "options": ["strongly transformative", "slightly changed", "stays the same", "multiple characters with various developments"],
+    "vector_type": "narrative"
+  },
+  {
+    "id": "vibe_emotion",
+    "title": "Which emotions dominate in this movie?",
+    "type": "multi",
+    "options": ["Joy", "Fear", "Sadness", "Surprise", "Anger", "Relief"],
+    "vector_type": "vibe"
+  },
+  {
+    "id": "style_sound",
+    "title": "How would you describe this movie's soundtrack or sound effects?",
+    "type": "multi",
+    "options": ["calm / atmospheric", "dramatic", "action-packed", "comedic", "suspenseful"],
+    "vector_type": "style"
+  },
+  {
+    "id": "narrative_pacing",
+    "title": "How do you perceive the pacing of this movie's plot?",
+    "type": "choice",
+    "options": ["slow", "moderate", "fast", "variable"],
+    "vector_type": "narrative"
+  },
+  {
+    "id": "style_prominent_colors",
+    "title": "Which colors appear particularly frequently in this movie?",
+    "type": "multi",
+    "options": ["Red", "Blue", "Green", "Yellow", "Orange", "Purple", "Brown", "Black", "White", "Pastel tones", "Neon colors"],
+    "vector_type": "style"
+  },
+  {
+    "id": "fun_rollercoaster",
+    "title": "If this movie's story were a rollercoaster, how wild would it be?",
+    "type": "choice",
+    "options": ["calm & leisurely", "with some surprises", "very wild", "totally unpredictable"],
+    "vector_type": "narrative"
+  },
+  {
+    "id": "open_analysis",
+    "title": "What would you tell others about this movie? Summarize briefly.",
+    "type": "text",
+    "vector_type": "narrative"
+  },
+  {
+    "id": "vibe_texture",
+    "title": "If you could touch this movie, how would it feel?",
+    "type": "choice",
+    "options": ["soft & fluffy", "rough & edgy", "smooth & shiny", "uneven & restless"],
+    "vector_type": "style"
+  },
+  {
+    "id": "style_colorgrading",
+    "title": "How would you describe this movie's color grading?",
+    "type": "choice",
+    "options": ["desaturated", "high contrast", "monochrome", "warm-toned", "cool-toned", "teal-orange", "vintage"],
+    "vector_type": "style"
+  },
+  {
+    "id": "most_similar_movie",
+    "title": "Which movie is most similar to this one?",
+    "type": "movie_select",
+    "options": ["Movie A", "Movie B", "Movie C"],
     "vector_type": "vibe"
   }
-  ]
+]

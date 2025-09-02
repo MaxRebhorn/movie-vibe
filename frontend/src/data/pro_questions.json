@@ -1,122 +1,122 @@
 [
   {
     "id": "cinematic_vibe_energy",
-    "title": "Wie würden Sie die kinetische Energie des Films beschreiben?",
+    "title": "How would you describe the kinetic energy of this movie?",
     "type": "choice",
-    "options": ["meditativ", "kontrolliert dynamisch", "hochfrequent", "überwältigend intensiv"],
+    "options": ["meditative", "controlled dynamic", "high-frequency", "overwhelmingly intense"],
     "vector_type": "vibe"
   },
   {
     "id": "emotional_palette",
-    "title": "Welche emotionale Farbpalette dominiert die Erzählung?",
+    "title": "Which emotional color palette dominates this movie's narrative?",
     "type": "multi",
-    "options": ["euphorisch", "melancholisch", "beklemmend", "suspenseful", "lyrisch", "dystopisch", "transzendent"],
+    "options": ["euphoric", "melancholic", "oppressive", "suspenseful", "lyrical", "dystopian", "transcendent"],
     "vector_type": "vibe"
   },
   {
     "id": "mise_en_scene",
-    "title": "Wie charakterisieren Sie die mise-en-scène?",
+    "title": "How would you characterize this movie's mise-en-scène?",
     "type": "choice",
-    "options": ["minimalistisch", "opulent", "naturalistisch", "stilisiert", "expressionistisch"],
+    "options": ["minimalist", "opulent", "naturalistic", "stylized", "expressionistic"],
     "vector_type": "style"
   },
   {
     "id": "visual_metaphor",
-    "title": "Welche visuellen Metaphern fallen besonders auf?",
+    "title": "Which visual metaphors stand out particularly in this movie?",
     "type": "text",
     "vector_type": "style"
   },
   {
     "id": "color_grading",
-    "title": "Wie ist der Color-Grading-Ansatz?",
+    "title": "What is this movie's color grading approach?",
     "type": "multi",
-    "options": ["desaturiert", "high contrast", "monochrom", "warmtonig", "kalttonig", "teal-orange", "vintage"],
+    "options": ["desaturated", "high contrast", "monochrome", "warm-toned", "cool-toned", "teal-orange", "vintage"],
     "vector_type": "style"
   },
   {
     "id": "cinematography_style",
-    "title": "Welche cinematographischen Stile dominieren?",
+    "title": "Which cinematographic styles dominate in this movie?",
     "type": "multi",
-    "options": ["planimetrisch", "deep focus", "shallow depth", "Steadicam", "handheld verité", "crane shots", "dolly zooms"],
+    "options": ["planimetric", "deep focus", "shallow depth", "Steadicam", "handheld verité", "crane shots", "dolly zooms"],
     "vector_type": "style"
   },
   {
     "id": "editing_rhythm",
-    "title": "Wie beschreiben Sie den Editing-Rhythmus?",
+    "title": "How would you describe this movie's editing rhythm?",
     "type": "choice",
-    "options": ["eisensteinisch montiert", "bazinisch lang", "pulsierend", "fragmentarisch", "hypnotisch"],
+    "options": ["Eisensteinian montage", "Bazinian long takes", "pulsating", "fragmented", "hypnotic"],
     "vector_type": "style"
   },
   {
     "id": "sound_design",
-    "title": "Welche Klangebene ist besonders hervorzuheben?",
+    "title": "Which sound layer is particularly noteworthy in this movie?",
     "type": "multi",
-    "options": ["diagetisch dominant", "non-diagetisch expressive", "soundscape-orientiert", "stillebetont", "foley-artistisch"],
+    "options": ["diegetically dominant", "non-diegetically expressive", "soundscape-oriented", "silence-emphasizing", "Foley-artistic"],
     "vector_type": "style"
   },
   {
     "id": "narrative_structure",
-    "title": "Welche narrative Struktur liegt vor?",
+    "title": "What narrative structure does this movie employ?",
     "type": "choice",
-    "options": ["dreiaktig klassisch", "episodisch", "non-linear", "ray-geschichtet", "kaleidoskopisch"],
+    "options": ["classic three-act", "episodic", "non-linear", "layered (ray)", "kaleidoscopic"],
     "vector_type": "narrative"
   },
   {
     "id": "thematic_depth",
-    "title": "Welche philosophischen/thematischen Tiefen werden erkundet?",
+    "title": "Which philosophical/thematic depths are explored in this movie?",
     "type": "multi",
-    "options": ["existentialistisch", "sozialkritisch", "psychoanalytisch", "existentialistisch", "metafiktional", "polit-allegorisch"],
+    "options": ["existentialist", "socio-critical", "psychoanalytic", "metafictional", "political-allegorical"],
     "vector_type": "narrative"
   },
   {
     "id": "character_arc",
-    "title": "Wie gestaltet sich der Charakterbogen?",
+    "title": "How is the character arc shaped in this movie?",
     "type": "choice",
-    "options": ["transformativ", "tragisch", "stationär", "fragmentarisch", "kollektiv"],
+    "options": ["transformative", "tragic", "stationary", "fragmentary", "collective"],
     "vector_type": "narrative"
   },
   {
     "id": "pacing_tempo",
-    "title": "Wie ist das narrative Tempo strukturiert?",
+    "title": "How is this movie's narrative tempo structured?",
     "type": "choice",
     "options": ["andante", "accelerando", "rubato", "crescendo", "staccato"],
     "vector_type": "narrative"
   },
   {
     "id": "directorial_voice",
-    "title": "Wie würden Sie die autoriale Handschrift beschreiben?",
+    "title": "How would you describe the auteurial signature of this movie?",
     "type": "text",
     "vector_type": "style"
   },
   {
     "id": "intertextual_references",
-    "title": "Welche intertextuellen Referenzen sind erkennbar?",
+    "title": "Which intertextual references are recognizable in this movie?",
     "type": "text",
     "vector_type": "narrative"
   },
   {
     "id": "genre_subversion",
-    "title": "Werden Genre-Konventionen unterlaufen oder dekonstruiert?",
+    "title": "Are genre conventions subverted or deconstructed in this movie?",
     "type": "choice",
-    "options": ["konventionell", "subversiv", "postmodern", "genre-hybrid", "transmedial"],
+    "options": ["conventional", "subversive", "postmodern", "genre-hybrid", "transmedial"],
     "vector_type": "narrative"
   },
   {
     "id": "cultural_context",
-    "title": "Wie positioniert sich der Film im kulturellen/historischen Kontext?",
+    "title": "How does this movie position itself within its cultural/historical context?",
     "type": "text",
     "vector_type": "narrative"
   },
   {
     "id": "auteur_touch",
-    "title": "Welche auteuristischen Signaturen sind erkennbar?",
+    "title": "Which auteurist signatures are recognizable in this movie?",
     "type": "multi",
-    "options": ["visuelle Leitmotive", "wiederkehrende Themen", "stilistische Kontinuität", "collaborative Wiederholung"],
+    "options": ["visual leitmotifs", "recurring themes", "stylistic continuity", "collaborative repetition"],
     "vector_type": "style"
   },
   {
     "id": "critical_analysis",
-    "title": "Was ist Ihre kritische Gesamtanalyse des Werks?",
+    "title": "What is your critical overall analysis of this work?",
     "type": "text",
     "vector_type": "narrative"
   }
