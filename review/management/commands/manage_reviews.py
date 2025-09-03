@@ -1,11 +1,9 @@
-# [file name]: management/commands/manage_reviews.py
-# [file content begin]
+# management/commands/manage_reviews.py
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
 from movies.models import Movie
 from review.models import MovieQuizReview
 from review.services.vector_review import remove_review_influence
-from datetime import datetime
 import json
 
 
@@ -50,30 +48,41 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        # Determine which reviews to target
+        reviews = self._build_queryset(options)
+        count = reviews.count()
+
+        self.stdout.write(f"Found {count} reviews matching criteria")
+
+        if count == 0:
+            return
+
+        if options['export']:
+            self._export_reviews(reviews, options['export'])
+
+        if options['dry_run']:
+            self._dry_run(reviews)
+        else:
+            self._delete_reviews(reviews)
+
+    # ------------------------
+    # Queryset / Filter
+    # ------------------------
+    def _build_queryset(self, options):
+        """Build queryset based on command-line options."""
         reviews = MovieQuizReview.objects.all()
 
         if options['user']:
-            try:
-                if options['user'].isdigit():
-                    user = User.objects.get(id=int(options['user']))
-                else:
-                    user = User.objects.get(username=options['user'])
-                reviews = reviews.filter(user=user)
-                self.stdout.write(f"Targeting reviews from user: {user.username} (ID: {user.id})")
-            except User.DoesNotExist:
-                raise CommandError(f"User '{options['user']}' not found")
+            user = self._get_user(options['user'])
+            reviews = reviews.filter(user=user)
+            self.stdout.write(f"Targeting reviews from user: {user.username} (ID: {user.id})")
 
         if options['movie']:
-            try:
-                movie = Movie.objects.get(id=options['movie'])
-                reviews = reviews.filter(movie=movie)
-                self.stdout.write(f"Targeting reviews for movie: {movie.title} (ID: {movie.id})")
-            except Movie.DoesNotExist:
-                raise CommandError(f"Movie with ID {options['movie']} not found")
+            movie = self._get_movie(options['movie'])
+            reviews = reviews.filter(movie=movie)
+            self.stdout.write(f"Targeting reviews for movie: {movie.title} (ID: {movie.id})")
 
         if options['review_ids']:
-            review_ids = [int(id) for id in options['review_ids'].split(',')]
+            review_ids = [int(i) for i in options['review_ids'].split(',')]
             reviews = reviews.filter(id__in=review_ids)
             self.stdout.write(f"Targeting specific review IDs: {review_ids}")
 
@@ -83,68 +92,71 @@ class Command(BaseCommand):
         if options['all_movies']:
             self.stdout.write("Targeting all reviews for all movies")
 
-        # Count reviews before any action
-        count_before = reviews.count()
-        self.stdout.write(f"Found {count_before} reviews matching criteria")
+        return reviews
 
-        if count_before == 0:
-            self.stdout.write("No reviews found matching criteria")
-            return
+    def _get_user(self, user_arg):
+        """Return a User object by ID or username."""
+        try:
+            if user_arg.isdigit():
+                return User.objects.get(id=int(user_arg))
+            return User.objects.get(username=user_arg)
+        except User.DoesNotExist:
+            raise CommandError(f"User '{user_arg}' not found")
 
-        # Export reviews if requested
-        if options['export']:
-            self.export_reviews(reviews, options['export'])
+    def _get_movie(self, movie_id):
+        """Return a Movie object by ID."""
+        try:
+            return Movie.objects.get(id=movie_id)
+        except Movie.DoesNotExist:
+            raise CommandError(f"Movie with ID {movie_id} not found")
 
-        # Dry run - just show what would be done
-        if options['dry_run']:
-            self.stdout.write("DRY RUN: Would remove the following reviews:")
-            for review in reviews:
-                self.stdout.write(
-                    f"  - Review {review.id}: User '{review.user.username}' "
-                    f"on movie '{review.movie.title}' "
-                    f"(created: {review.created_at})"
-                )
-            return
+    # ------------------------
+    # Actions
+    # ------------------------
+    def _dry_run(self, reviews):
+        """List reviews that would be removed."""
+        self.stdout.write("DRY RUN: Would remove the following reviews:")
+        for r in reviews.only("id", "user__username", "movie__title", "created_at"):
+            self.stdout.write(
+                f"  - Review {r.id}: User '{r.user.username}' "
+                f"on movie '{r.movie.title}' (created: {r.created_at})"
+            )
 
-        # Actually remove the reviews
+    def _delete_reviews(self, reviews):
+        """Remove reviews and their vector influence."""
         removed_count = 0
-        for review in reviews:
+        for r in reviews.iterator():
             try:
-                # Remove influence from vector store
-                remove_review_influence(review, review.movie.id)
-
-                # Delete the review
-                review.delete()
+                remove_review_influence(r, r.movie.id)
+                r.delete()
                 removed_count += 1
                 self.stdout.write(
-                    f"Removed review {review.id} (user: {review.user.username}, "
-                    f"movie: {review.movie.title})"
+                    f"Removed review {r.id} (user: {r.user.username}, movie: {r.movie.title})"
                 )
             except Exception as e:
-                self.stderr.write(f"Error removing review {review.id}: {str(e)}")
+                self.stderr.write(f"Error removing review {r.id}: {str(e)}")
 
         self.stdout.write(f"Successfully removed {removed_count} reviews")
 
-    def export_reviews(self, reviews, filename):
-        """Export reviews to JSON file"""
+    def _export_reviews(self, reviews, filename):
+        """Export reviews to JSON file."""
         review_data = []
-        for review in reviews:
+        for r in reviews.iterator():
             review_data.append({
-                'id': review.id,
-                'user_id': review.user.id,
-                'username': review.user.username,
-                'movie_id': review.movie.id,
-                'movie_title': review.movie.title,
-                'created_at': review.created_at.isoformat(),
-                'updated_at': review.updated_at.isoformat(),
-                'vibe_embedding': review.vibe_embedding,
-                'narrative_embedding': review.narrative_embedding,
-                'style_embedding': review.style_embedding,
-                'answers': review.answers
+                'id': r.id,
+                'user_id': r.user.id,
+                'username': r.user.username,
+                'movie_id': r.movie.id,
+                'movie_title': r.movie.title,
+                'created_at': r.created_at.isoformat(),
+                'updated_at': r.updated_at.isoformat(),
+                'vibe_embedding': r.vibe_embedding,
+                'narrative_embedding': r.narrative_embedding,
+                'style_embedding': r.style_embedding,
+                'answers': r.answers,
             })
 
         with open(filename, 'w') as f:
             json.dump(review_data, f, indent=2)
 
         self.stdout.write(f"Exported {len(review_data)} reviews to {filename}")
-# [file content end]
