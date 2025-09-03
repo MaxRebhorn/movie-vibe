@@ -2,9 +2,7 @@ import os
 from unittest import skipIf
 
 from django.test import TestCase
-from django.contrib.auth.models import User
-from movies.models import Movie
-from user.models import UserProfile
+
 
 import random
 import numpy as np
@@ -25,6 +23,10 @@ class MovieVectorPushTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+
+        from movies.models import Movie
+        from django.contrib.auth.models import User
+        from user.models import UserProfile
         # Create main movie
         cls.movable = Movie.objects.create(
             title="Movable Movie",
