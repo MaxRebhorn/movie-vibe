@@ -1,15 +1,19 @@
+import os
+from unittest import skipIf
+
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
 
 
-
+@skipIf(os.getenv("SKIP_HEAVY_TESTS") == "1", "Skip heavy tests in CI")
 class RemoveReviewInfluenceTest(TestCase):
-    from review.services import vector_review
+
 
     @patch("review.services.vector_review.client")  # Mock Qdrant client
     @patch("review.services.vector_review.create_combined_vector_history")  # Mock history creation
     def test_remove_review_influence_runs(self, mock_history, mock_client):
+        from review.services import vector_review
         # --- Setup fake review and movie_id ---
         class FakeReview:
             id = 1
