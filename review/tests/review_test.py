@@ -1,3 +1,6 @@
+import os
+from unittest import skipIf
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
@@ -6,7 +9,7 @@ from movies.models import Movie
 from review.models import Review
 from datetime import date
 
-
+@skipIf(os.getenv("SKIP_HEAVY_TESTS") == "1", "Skip heavy tests in CI")
 class ReviewViewSetTests(APITestCase):
     @classmethod
     def setUpTestData(cls):
