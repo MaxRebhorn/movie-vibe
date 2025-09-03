@@ -67,19 +67,11 @@ function MoviePage() {
                     poster={movie.poster_url}
                     trailer={movie.trailer_url}
                     streaming_providers={movie.streaming_providers}
+                    theme={theme}
+                    id={id}
                 />
 
-                <Link to={`/movies/${id}/review`} className={`
-                    ${styles.linkWrapper}
-                    ${anim.btnPress}
-                    ${anim.hoverGlow}
-                    ${anim.hoverZoom}
-                `}>
-                    <Icon
-                        name={theme !== 'dark' ? 'review_light.svg' : 'review.svg'}
-                        className={styles.icon}
-                    />
-                </Link>
+
 
                 <h2>Similar Movies</h2>
                 {similarError || similarMovies.length === 0 ? (

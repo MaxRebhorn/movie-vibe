@@ -6,8 +6,11 @@ import MovieMeta from "../../molecules/MovieMeta/MovieMeta";
 import PosterImage from "../../atoms/PosterImage/PosterImage";
 import VideoBox from "../../atoms/VideoBox/VideoBox";
 import StreamingProviderList from "../../molecules/StreamingProviderList/StreamingProviderList";
+import {Link} from "react-router-dom";
+import anim from "../../../styles/animation.module.css";
+import Icon from "../../atoms/Icon/Icon";
 
-function MovieProfile({title, synopsis, director, releaseDate, cast, poster, trailer, streaming_providers}) {
+function MovieProfile({title, synopsis, director, releaseDate, cast, poster, trailer, streaming_providers,id,theme}) {
     return (
         <div className={styles.container}>
             <div className={styles.leftColumn}>
@@ -18,6 +21,17 @@ function MovieProfile({title, synopsis, director, releaseDate, cast, poster, tra
                 <VideoBox
                     url={trailer}
                 />
+                  <Link to={`/movies/${id}/review`} className={`
+                    ${styles.linkWrapper}
+                    ${anim.btnPress}
+                    ${anim.hoverGlow}
+                    ${anim.hoverZoom}
+                `}>
+                    <Icon
+                        name={theme !== 'light' ? 'review_light.svg' : 'review.svg'}
+                        className={styles.icon}
+                    />
+                </Link>
             </div>
             <div className={styles.rightColumn}>
                 <PosterImage src={poster} alt={title}/>
