@@ -1,8 +1,11 @@
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
-from review.services import vector_review
+
+
+
 
 class RemoveReviewInfluenceTest(TestCase):
+    from review.services import vector_review
 
     @patch("review.services.vector_review.client")  # Mock Qdrant client
     @patch("review.services.vector_review.create_combined_vector_history")  # Mock history creation

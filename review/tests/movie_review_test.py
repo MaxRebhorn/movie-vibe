@@ -1,9 +1,11 @@
+import os
+from unittest import skipIf
+
 from django.test import TestCase
 from django.contrib.auth.models import User
 from movies.models import Movie
 from user.models import UserProfile
-from review.services.embed_review import process_quiz_review
-from review.services.vector_review import update_weighted_embedding
+
 import random
 import numpy as np
 
@@ -16,7 +18,10 @@ def cosine_similarity(vec_a, vec_b):
     return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b)))
 
 
+@skipIf(os.getenv("SKIP_HEAVY_TESTS") == "1", "Skip heavy tests in CI")
 class MovieVectorPushTests(TestCase):
+    from review.services.embed_review import process_quiz_review
+    from review.services.vector_review import update_weighted_embedding
 
     @classmethod
     def setUpTestData(cls):
