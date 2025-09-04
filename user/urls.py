@@ -11,7 +11,8 @@ from .views import (  # Ensure this is a relative import
     RemoveFavoriteMovieView,
     UserReviewListView,
     LoginView,
-    get_csrf_token
+    get_csrf_token,
+check_auth
 )
 
 urlpatterns = [
@@ -25,4 +26,5 @@ urlpatterns = [
     path('favorites/remove/<int:movie_id>/', RemoveFavoriteMovieView.as_view(), name='remove-favorite-movie'),
     path('get-csrf/', get_csrf_token, name='get-csrf-token'),
     path('reviews/', UserReviewListView.as_view(), name='user-reviews'),
+    path('check-auth/', check_auth, name='check-auth'),
 ]

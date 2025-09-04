@@ -1,6 +1,7 @@
 # users/views.py
 from django.contrib.auth import authenticate, login
 from rest_framework import generics, permissions, status
+from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -99,3 +100,12 @@ class UserReviewListView(generics.ListAPIView):
 @ensure_csrf_cookie
 def get_csrf_token(request):
     return JsonResponse({'detail': 'CSRF cookie set'})
+
+@api_view(['GET'])
+def check_auth(request):
+    if request.user.is_authenticated:
+        return Response({
+            "username": request.user.username,
+            "email": request.user.email,
+        })
+    return Response({"user": None}, status=200)

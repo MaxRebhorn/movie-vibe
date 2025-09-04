@@ -6,8 +6,10 @@ import LoginPage from "./pages/LoginPage/LoginPage";
 import RegisterPage from "./pages/RegisterPage/RegisterPage"; // adjust if path differs
 import UserPage from "./pages/UserPage/UserPage";
 import Questionnaire from "./pages/Questionnaire/Questionnaire";
+import { AuthProvider } from "./context/AuthContext";
 function App() {
   return (
+        <AuthProvider>
     <Router>
       <Routes>
         {/* Base route */}
@@ -22,6 +24,7 @@ function App() {
         {/* <Route path="/contact" element={<Contact />} /> */}
       </Routes>
     </Router>
+        </AuthProvider>
   );
 }
 
