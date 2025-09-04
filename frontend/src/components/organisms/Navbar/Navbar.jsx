@@ -67,7 +67,7 @@ const Navbar = () => {
                 `}>
                     <Icon name={theme !== 'dark' ? 'add_light.svg' : 'add.svg'} className={styles.icon}/>
                 </Link>
-                <Link to={`/user`} className={`
+                <Link to={user ? "/favorites" : "/login"} className={`
                     ${styles.linkWrapper}
                     ${anim.btnPress}
                     ${anim.hoverGlow}

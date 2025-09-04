@@ -7,6 +7,7 @@ import RegisterPage from "./pages/RegisterPage/RegisterPage"; // adjust if path 
 import UserPage from "./pages/UserPage/UserPage";
 import Questionnaire from "./pages/Questionnaire/Questionnaire";
 import { AuthProvider } from "./context/AuthContext";
+import LikePage from "./pages/LikePage/LikePage"
 function App() {
   return (
         <AuthProvider>
@@ -19,6 +20,7 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
           <Route path="/user" element={<UserPage />} />
            <Route path="/movies/:id/review" element={<Questionnaire />} />
+                <Route path="/favorites" element={<LikePage />} />
         {/* Example of other routes */}
         {/* <Route path="/about" element={<About />} /> */}
         {/* <Route path="/contact" element={<Contact />} /> */}

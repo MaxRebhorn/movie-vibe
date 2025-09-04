@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/organisms/Navbar/Navbar';
 import UserProfile from '../../components/organisms/UserProfile/UserProfile';
 import MovieGrid from "../../components/organisms/MovieGrid/MovieGrid";
-import styles from './UserPage.module.css';
+import styles from './LikePage.module.css';
 import { AuthContext } from '../../context/AuthContext';
 import { movieAPI, favoriteAPI } from '../../services/api';
 
-function UserPage() {
+function LikePage() {
     const { user } = useContext(AuthContext); // Get current user from context
     const navigate = useNavigate();
 
@@ -64,15 +64,6 @@ function UserPage() {
         <div className={styles.container}>
             <Navbar />
             <main className={styles.main}>
-                <UserProfile
-                    username={user.username}
-                    profilepicture={user.profilepicture}
-                    rank={user.rank}
-                    reviews_written={user.reviews_written}
-                    movies_watched={user.movies_watched}
-                    movies_added={user.movies_added}
-                />
-
                 <h2>Your Favorites</h2>
                 {loadingFavorites ? (
                     <p>Loading favorites...</p>
@@ -81,18 +72,9 @@ function UserPage() {
                 ) : (
                     <MovieGrid movies={favoriteMovies} />
                 )}
-
-                <h2>You Might Like These Movies Based on Your Likes</h2>
-                {loadingSimilar ? (
-                    <p>Loading recommendations...</p>
-                ) : errorSimilar || similarMovies.length === 0 ? (
-                    <p>No similar movies found.</p>
-                ) : (
-                    <MovieGrid movies={similarMovies} />
-                )}
             </main>
         </div>
     );
 }
 
-export default UserPage;
+export default LikePage;
