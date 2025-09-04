@@ -70,6 +70,16 @@ export const movieAPI = {
     apiFetch(`/api/movies/${id}/similar/`),
 };
 
+// Favorite movies API calls
+export const favoriteAPI = {
+    getFavorites: () => apiFetch('/api/favorites/'),
+    toggleFavorite: (movieId) => apiFetch('/api/favorites/', {
+        method: 'POST',
+        body: JSON.stringify({ movie_id: movieId }),
+    }),
+    checkFavorite: (movieId) => apiFetch(`/api/favorites/check/${movieId}/`)
+};
+
 // Questionnaire-related API calls
 export const questionnaireAPI = {
   submitQuestionnaire: (movieId, payload) =>

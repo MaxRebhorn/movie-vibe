@@ -1,83 +1,91 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+// File: src/pages/UserPage/UserPage.jsx
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/organisms/Navbar/Navbar';
 import UserProfile from '../../components/organisms/UserProfile/UserProfile';
 import MovieGrid from "../../components/organisms/MovieGrid/MovieGrid";
 import styles from './UserPage.module.css';
+import { AuthContext } from '../../context/AuthContext';
+import { movieAPI, favoriteAPI } from '../../services/api';
 
 function UserPage() {
-    const { userId } = useParams();
+    const { user } = useContext(AuthContext); // Get current user from context
     const navigate = useNavigate();
 
-    // state for user data
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    // state for recommended movies
+    const [favoriteMovies, setFavoriteMovies] = useState([]);
     const [similarMovies, setSimilarMovies] = useState([]);
-    const [similarError, setSimilarError] = useState(null);
+    const [loadingFavorites, setLoadingFavorites] = useState(true);
+    const [loadingSimilar, setLoadingSimilar] = useState(true);
+    const [errorFavorites, setErrorFavorites] = useState(null);
+    const [errorSimilar, setErrorSimilar] = useState(null);
 
+    // Fetch favorite movies
     useEffect(() => {
-        // check if user is logged in
-        const authToken = localStorage.getItem('authToken'); // or your login state
-        if (!authToken) {
-            navigate('/login'); // redirect to login if not logged in
+        if (!user) return;
+
+        const fetchFavorites = async () => {
+            try {
+                const data = await favoriteAPI.getFavorites();
+                setFavoriteMovies(data);
+            } catch (err) {
+                setErrorFavorites(err.message);
+            } finally {
+                setLoadingFavorites(false);
+            }
+        };
+
+        fetchFavorites();
+    }, [user]);
+
+    // Fetch similar/recommended movies
+    useEffect(() => {
+        if (!user) {
+            navigate('/login'); // redirect to login if no user
             return;
         }
 
-        const fetchUser = async () => {
-            try {
-                const res = await fetch(`/api/users/${userId}`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (!res.ok) throw new Error("Failed to load user");
-                const data = await res.json();
-                setUser(data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         const fetchRecommendations = async () => {
             try {
-                const res = await fetch(`/api/users/${userId}/recommendations`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (!res.ok) throw new Error("Failed to load recommendations");
-                const data = await res.json();
+                const data = await movieAPI.getSimilarMovies(user.id); // or use user preferences
                 setSimilarMovies(data);
             } catch (err) {
-                setSimilarError(err.message);
+                setErrorSimilar(err.message);
+            } finally {
+                setLoadingSimilar(false);
             }
         };
 
-        fetchUser();
         fetchRecommendations();
-    }, [userId, navigate]);
+    }, [user, navigate]);
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>{error}</p>;
+    if (!user) return null; // nothing to render while redirecting
 
     return (
         <div className={styles.container}>
             <Navbar />
             <main className={styles.main}>
-                {user && (
-                    <UserProfile
-                        username={user.username}
-                        profilepicture={user.profilepicture}
-                        rank={user.rank}
-                        reviews_written={user.reviews_written}
-                        movies_watched={user.movies_watched}
-                        movies_added={user.movies_added}
-                    />
+                <UserProfile
+                    username={user.username}
+                    profilepicture={user.profilepicture}
+                    rank={user.rank}
+                    reviews_written={user.reviews_written}
+                    movies_watched={user.movies_watched}
+                    movies_added={user.movies_added}
+                />
+
+                <h2>Your Favorites</h2>
+                {loadingFavorites ? (
+                    <p>Loading favorites...</p>
+                ) : errorFavorites || favoriteMovies.length === 0 ? (
+                    <p>No favorite movies yet.</p>
+                ) : (
+                    <MovieGrid movies={favoriteMovies} />
                 )}
 
-                <h2>You Might Like these Movies based on your likes</h2>
-                {similarError || similarMovies.length === 0 ? (
+                <h2>You Might Like These Movies Based on Your Likes</h2>
+                {loadingSimilar ? (
+                    <p>Loading recommendations...</p>
+                ) : errorSimilar || similarMovies.length === 0 ? (
                     <p>No similar movies found.</p>
                 ) : (
                     <MovieGrid movies={similarMovies} />

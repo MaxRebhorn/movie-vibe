@@ -17,6 +17,26 @@ class UserProfile(models.Model):
     def give_xp(self, xp):
         self.xp += xp
         self.save()
+
+    def add_favorite_movie(self, movie_id):
+        try:
+            movie = Movie.objects.get(id=movie_id)
+            self.favorite_movies.add(movie)
+            self.save()
+        except Movie.DoesNotExist:
+            # Optional: handle the case where the movie doesn't exist
+            pass
+
+    def remove_favorite_movie(self, movie_id):
+        try:
+            movie = Movie.objects.get(id=movie_id)
+            if movie in self.favorite_movies.all():
+                self.favorite_movies.remove(movie)
+                self.save()
+        except Movie.DoesNotExist:
+            pass
+
+
     @property
     def level(self):
         # Beispiel: jede 100 XP = 1 Level, hier leicht skalierbar

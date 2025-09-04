@@ -1,8 +1,8 @@
 # users/views.py
 from django.contrib.auth import authenticate, login
 from rest_framework import generics, permissions, status
-from rest_framework.decorators import api_view
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -94,6 +94,55 @@ class UserReviewListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Review.objects.filter(user=self.request.user).select_related('movie')
+
+
+class FavoriteMovieView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        """Get all favorite movies of the authenticated user"""
+        profile = UserProfile.objects.get(user=request.user)
+        favorites = profile.favorite_movies.all()
+        serializer = MovieSerializer(favorites, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        """Toggle a movie in the user's favorites"""
+        movie_id = request.data.get("movie_id")
+        if not movie_id:
+            return Response({'error': 'Movie ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile = UserProfile.objects.get(user=request.user)
+
+        try:
+            movie = Movie.objects.get(id=movie_id)
+        except Movie.DoesNotExist:
+            return Response({'error': 'Movie not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if movie in profile.favorite_movies.all():
+            profile.favorite_movies.remove(movie)
+            profile.save()
+            return Response({'detail': 'Movie removed from favorites.'})
+        else:
+            profile.favorite_movies.add(movie)
+            profile.save()
+            return Response({'detail': 'Movie added to favorites.'})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def is_favorite_movie(request, movie_id):
+    """
+    Check if a specific movie is in the current user's favorites.
+    Returns: { "is_favorite": true/false }
+    """
+    try:
+        movie = Movie.objects.get(id=movie_id)
+    except Movie.DoesNotExist:
+        return Response({'error': 'Movie not found'}, status=404)
+
+    profile = UserProfile.objects.get(user=request.user)
+    is_fav = movie in profile.favorite_movies.all()
+    return Response({'is_favorite': is_fav})
 
 
 

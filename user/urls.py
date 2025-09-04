@@ -12,7 +12,9 @@ from .views import (  # Ensure this is a relative import
     UserReviewListView,
     LoginView,
     get_csrf_token,
-check_auth
+    check_auth,
+    FavoriteMovieView,
+is_favorite_movie
 )
 
 urlpatterns = [
@@ -21,10 +23,11 @@ urlpatterns = [
     path('profile/', ProfileView.as_view(), name='profile'),
     path('profile/update/', UpdateProfileView.as_view(), name='update-profile'),
 
-    path('favorites/', FavoriteMovieListView.as_view(), name='favorite-movies'),
-    path('favorites/add/<int:movie_id>/', AddFavoriteMovieView.as_view(), name='add-favorite-movie'),
-    path('favorites/remove/<int:movie_id>/', RemoveFavoriteMovieView.as_view(), name='remove-favorite-movie'),
+
+
     path('get-csrf/', get_csrf_token, name='get-csrf-token'),
-    path('reviews/', UserReviewListView.as_view(), name='user-reviews'),
     path('check-auth/', check_auth, name='check-auth'),
+    path('favorites/', FavoriteMovieView.as_view(), name='favorite-movies'),  # Handles GET & POST
+    path('favorites/check/<int:movie_id>/', is_favorite_movie, name='check-favorite-movie'),
+    path('reviews/', UserReviewListView.as_view(), name='user-reviews'),
 ]
