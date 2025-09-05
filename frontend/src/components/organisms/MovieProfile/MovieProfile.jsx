@@ -46,26 +46,26 @@ function MovieProfile({
     }, [id]);
 
     const handleFavoriteClick = async () => {
-    console.log('Favorite button clicked for movie ID:', id);
-    if (loading) return;
-    setLoading(true);
+        console.log('Favorite button clicked for movie ID:', id);
+        if (loading) return;
+        setLoading(true);
 
-    try {
-        const response = await favoriteAPI.toggleFavorite(id);
-        console.log('Toggle favorite response:', response);
+        try {
+            const response = await favoriteAPI.toggleFavorite(id);
+            console.log('Toggle favorite response:', response);
 
-        // compute the next state
-        setIsFavorite(prev => {
-            const next = !prev;
-            if (onToggleFavorite) onToggleFavorite(id, next);
-            return next;
-        });
-    } catch (err) {
-        console.error('Error toggling favorite:', err.message);
-    } finally {
-        setLoading(false);
-    }
-};
+            // compute the next state
+            setIsFavorite(prev => {
+                const next = !prev;
+                if (onToggleFavorite) onToggleFavorite(id, next);
+                return next;
+            });
+        } catch (err) {
+            console.error('Error toggling favorite:', err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     return (
@@ -73,6 +73,7 @@ function MovieProfile({
             <div className={styles.leftColumn}>
                 <MovieTitleContainer title={title} synopsis={synopsis}/>
                 <VideoBox url={trailer}/>
+                <div className={styles.spaced_container}>
                 <Link
                     to={`/movies/${id}/review`}
                     className={`${styles.linkWrapper} ${anim.btnPress} ${anim.hoverGlow} ${anim.hoverZoom}`}
@@ -82,16 +83,16 @@ function MovieProfile({
                         className={styles.icon}
                     />
                 </Link>
-         <IconButton
-    key={isFavorite} // <-- forces re-render when favorite toggles
-    onClick={handleFavoriteClick}
-    disabled={loading}
-    name={isFavorite
-        ? (theme !== 'light' ? 'like_filled_light.svg' : 'like_filled.svg')
-        : (theme !== 'light' ? 'like_light.svg' : 'like.svg')
-    }
-/>
-
+                <IconButton
+                    key={isFavorite} // <-- forces re-render when favorite toggles
+                    onClick={handleFavoriteClick}
+                    disabled={loading}
+                    name={isFavorite
+                        ? (theme !== 'light' ? 'like_filled_light.svg' : 'like_filled.svg')
+                        : (theme !== 'light' ? 'like_light.svg' : 'like.svg')
+                    }
+                />
+                </div>
             </div>
 
             <div className={styles.rightColumn}>

@@ -1,0 +1,7 @@
+.icon {
+  width: 2rem;    /* ~24px */
+  height: 2rem;
+  display: block;   /* remove inline baseline shifts */
+  object-fit: contain; /* keeps aspect ratio */
+  flex-shrink: 0;   /* prevent shrinking inside flexbox */
+}

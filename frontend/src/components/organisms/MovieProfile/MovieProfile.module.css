@@ -91,3 +91,9 @@
     line-height: 1.5;
     color: var(--text-primary);
 }
+
+.spaced_container {
+  display: flex;
+  justify-content: space-between; /* or gap: 20px */
+  align-items: center;            /* keep vertical alignment fixed */
+}
