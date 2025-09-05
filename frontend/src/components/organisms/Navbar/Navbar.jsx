@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import Text from '../../atoms/Text/Text';
 import Icon from '../../atoms/Icon/Icon';
 import IconButton from '../../molecules/IconButton/IconButton';
@@ -6,31 +6,11 @@ import styles from './Navbar.module.css';
 import { Link } from "react-router-dom";
 import anim from "../../../styles/animation.module.css";
 import { AuthContext } from "../../../context/AuthContext";
+import { useTheme } from "../../../context/ThemeContext"; // <- import the hook
 
 const Navbar = () => {
-    const [theme, setTheme] = useState('dark');
     const { user } = useContext(AuthContext);
-
-    // Debug: log the user every render
-    console.log("Navbar render — user:", user);
-
-    useEffect(() => {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        setTheme(savedTheme);
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    }, []);
-
-    const toggleTheme = () => {
-        const newTheme = theme === 'dark' ? 'light' : 'dark';
-        setTheme(newTheme);
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-    };
-
-    // Debug: log whenever the user changes
-    useEffect(() => {
-        console.log("AuthContext user updated:", user);
-    }, [user]);
+    const { theme, toggleTheme } = useTheme(); // <- get theme and toggle from context
 
     return (
         <nav className={styles.navbar}>

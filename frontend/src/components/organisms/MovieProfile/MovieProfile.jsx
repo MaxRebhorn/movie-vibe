@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './MovieProfile.module.css';
 import MovieTitleContainer from "../../molecules/MovieTitleContainer/MovieTitleContainer";
 import MovieCastList from "../../molecules/MovieCastList/MovieCastList";
@@ -6,26 +6,27 @@ import MovieMeta from "../../molecules/MovieMeta/MovieMeta";
 import PosterImage from "../../atoms/PosterImage/PosterImage";
 import VideoBox from "../../atoms/VideoBox/VideoBox";
 import StreamingProviderList from "../../molecules/StreamingProviderList/StreamingProviderList";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import anim from "../../../styles/animation.module.css";
 import Icon from "../../atoms/Icon/Icon";
 import IconButton from "../../molecules/IconButton/IconButton";
-import {favoriteAPI} from '../../../services/api';
+import { favoriteAPI } from '../../../services/api';
+import { useTheme } from '../../../context/ThemeContext'; // <- import hook
 
 function MovieProfile({
-                          title,
-                          synopsis,
-                          director,
-                          releaseDate,
-                          cast,
-                          poster,
-                          trailer,
-                          streaming_providers,
-                          id,
-                          theme,
-                          is_favorite = false,
-                          onToggleFavorite
-                      }) {
+    title,
+    synopsis,
+    director,
+    releaseDate,
+    cast,
+    poster,
+    trailer,
+    streaming_providers,
+    id,
+    is_favorite = false,
+    onToggleFavorite
+}) {
+    const { theme } = useTheme(); // <- get theme from context
     const [isFavorite, setIsFavorite] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -54,7 +55,6 @@ function MovieProfile({
             const response = await favoriteAPI.toggleFavorite(id);
             console.log('Toggle favorite response:', response);
 
-            // compute the next state
             setIsFavorite(prev => {
                 const next = !prev;
                 if (onToggleFavorite) onToggleFavorite(id, next);
@@ -67,6 +67,11 @@ function MovieProfile({
         }
     };
 
+    // prepare icon names based on theme
+    const reviewIcon = theme === 'light' ? 'review_light.svg' :'review.svg' ;
+    const favoriteIcon = isFavorite
+        ? (theme === 'light' ? 'like_filled_light.svg' : 'like_filled.svg')
+        : (theme === 'light' ? 'like_light.svg' : 'like.svg');
 
     return (
         <div className={styles.container}>
@@ -74,24 +79,17 @@ function MovieProfile({
                 <MovieTitleContainer title={title} synopsis={synopsis}/>
                 <VideoBox url={trailer}/>
                 <div className={styles.spaced_container}>
-                <Link
-                    to={`/movies/${id}/review`}
-                    className={`${styles.linkWrapper} ${anim.btnPress} ${anim.hoverGlow} ${anim.hoverZoom}`}
-                >
-                    <Icon
-                        name={theme !== 'light' ? 'review_light.svg' : 'review.svg'}
-                        className={styles.icon}
+                    <Link
+                        to={`/movies/${id}/review`}
+                        className={`${styles.linkWrapper} ${anim.btnPress} ${anim.hoverGlow} ${anim.hoverZoom}`}
+                    >
+                        <Icon name={reviewIcon} className={styles.icon}/>
+                    </Link>
+                    <IconButton
+                        onClick={handleFavoriteClick}
+                        disabled={loading}
+                        name={favoriteIcon}
                     />
-                </Link>
-                <IconButton
-                    key={isFavorite} // <-- forces re-render when favorite toggles
-                    onClick={handleFavoriteClick}
-                    disabled={loading}
-                    name={isFavorite
-                        ? (theme !== 'light' ? 'like_filled_light.svg' : 'like_filled.svg')
-                        : (theme !== 'light' ? 'like_light.svg' : 'like.svg')
-                    }
-                />
                 </div>
             </div>
 
