@@ -1,12 +1,13 @@
 .grid {
   display: grid;
-  gap: 24px;
+  gap: 1.5rem; /* scales with root font size */
   justify-content: center;
 
-  /* Always 3 columns */
-  grid-template-columns: repeat(3, 1fr);
+  /* Responsive columns */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   align-items: start;
 }
+
 
 @keyframes fadeUp {
   0% {
