@@ -68,8 +68,8 @@ function MovieProfile({
     };
 
     // prepare icon names based on theme
-    const reportIcon = theme === 'light' ? 'review_light.svg' :'review.svg' ;
-    const reviewIcon = theme === 'light' ? 'report_light.svg' :'report.svg' ;
+const reviewIcon = theme === 'light' ? 'review_light.svg' : 'review.svg';
+const reportIcon = theme === 'light' ? 'report_light.svg' : 'report.svg';
     const favoriteIcon = isFavorite
         ? (theme === 'light' ? 'like_filled_light.svg' : 'like_filled.svg')
         : (theme === 'light' ? 'like_light.svg' : 'like.svg');
@@ -86,6 +86,7 @@ function MovieProfile({
                     >
                         <Icon name={reviewIcon} className={styles.icon}/>
                     </Link>
+
                     <IconButton
                         onClick={handleFavoriteClick}
                         disabled={loading}
