@@ -18,6 +18,10 @@ from .serializer import (  # Changed from relative import
 )
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
+
+from .services import pool_service
+
+
 # === Create Account ===
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -127,6 +131,31 @@ class FavoriteMovieView(APIView):
             profile.favorite_movies.add(movie)
             profile.save()
             return Response({'detail': 'Movie added to favorites.'})
+
+
+class Get_Movie_Recommendations(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        """Get movie recommendations based on user pools"""
+        profile = UserProfile.objects.get(user=request.user)
+        recommendations = pool_service.get_recommendations(profile, top_n=20)
+
+        # Film-Objekte holen
+        movie_ids = [rec["movie_id"] for rec in recommendations]
+        movies = Movie.objects.filter(id__in=movie_ids)
+        movie_dict = {movie.id: movie for movie in movies}
+
+        # Ergebnisse in Score-Reihenfolge sortieren
+        sorted_movies = [movie_dict.get(mid) for mid in movie_ids if mid in movie_dict]
+
+        serializer = MovieSerializer(sorted_movies, many=True)
+        return Response(serializer.data)
+
+
+
+
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
