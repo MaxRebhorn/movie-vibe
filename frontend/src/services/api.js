@@ -68,6 +68,12 @@ export const movieAPI = {
 
   getSimilarMovies: (id) =>
     apiFetch(`/api/movies/${id}/similar/`),
+
+
+};
+
+export const recommendationAPI = {
+    getRecommendations: () => apiFetch('/api/recommendations/')
 };
 
 // Favorite movies API calls

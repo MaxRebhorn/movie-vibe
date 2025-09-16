@@ -137,20 +137,17 @@ class Get_Movie_Recommendations(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        """Get movie recommendations based on user pools"""
         profile = UserProfile.objects.get(user=request.user)
         recommendations = pool_service.get_recommendations(profile, top_n=20)
 
-        # Film-Objekte holen
         movie_ids = [rec["movie_id"] for rec in recommendations]
         movies = Movie.objects.filter(id__in=movie_ids)
         movie_dict = {movie.id: movie for movie in movies}
-
-        # Ergebnisse in Score-Reihenfolge sortieren
-        sorted_movies = [movie_dict.get(mid) for mid in movie_ids if mid in movie_dict]
+        sorted_movies = [movie_dict[mid] for mid in movie_ids if mid in movie_dict]
 
         serializer = MovieSerializer(sorted_movies, many=True)
         return Response(serializer.data)
+
 
 
 

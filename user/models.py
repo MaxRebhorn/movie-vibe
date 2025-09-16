@@ -1,6 +1,19 @@
+import numpy as np
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.contrib.auth.models import User
 from movies.models import Movie
+
+# ============================
+# Configurable Hyperparameters
+# ============================
+# All values here can be easily tweaked without digging into logic.
+POOL_MIN_RADIUS = 0.5          # fallback minimum radius
+POOL_GROW_FACTOR = 1.2         # factor to grow radius each iteration
+POOL_MAX_GROW_STEPS = 5        # safety limit to avoid infinite loops
+POOL_MIN_CANDIDATES = 10       # target minimum candidates inside the sphere
+POOL_SIGMA_DIVISOR = 3.0       # controls Gaussian score sharpness
+POOL_SURFACE_TENSION = 0.02  # controls how resistant pools are to splitting
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -24,7 +37,6 @@ class UserProfile(models.Model):
             self.favorite_movies.add(movie)
             self.save()
         except Movie.DoesNotExist:
-            # Optional: handle the case where the movie doesn't exist
             pass
 
     def remove_favorite_movie(self, movie_id):
@@ -36,11 +48,10 @@ class UserProfile(models.Model):
         except Movie.DoesNotExist:
             pass
 
-
     @property
     def level(self):
-        # Beispiel: jede 100 XP = 1 Level, hier leicht skalierbar
         return self.xp // 100
+
 
 class UserPool(models.Model):
     DIMENSION_CHOICES = [
@@ -54,12 +65,12 @@ class UserPool(models.Model):
 
     # Hypersphere
     center = ArrayField(models.FloatField(), size=300)
-    radius = models.FloatField(default=0.7)
+    radius = models.FloatField(default=POOL_MIN_RADIUS)
 
     # Surface Tension Parameter
-    surface_tension = models.FloatField(default=0.02, help_text="Wie groß/dicht muss ein Außencluster sein, damit ein neuer Pool gebildet werden kann")
+    surface_tension = models.FloatField(default=POOL_SURFACE_TENSION)
 
-    # Aggregats für inkrementelle Updates
+    # Aggregates for incremental updates
     pos_weight_sum = models.FloatField(default=0.0)
     pos_weighted_sum = ArrayField(models.FloatField(), size=300, default=list)
 
@@ -85,32 +96,42 @@ class UserPool(models.Model):
     # ---------------- Core Methods ----------------
 
     def update_center(self):
-        """Berechnet das neue Zentrum aus den gewichteten Summen"""
+        """Recalculate pool center from positive weighted vectors."""
         if self.pos_weight_sum > 0:
             vec = np.array(self.pos_weighted_sum)
             self.center = (vec / self.pos_weight_sum).tolist()
-        self.save()
+            self.save()
 
     def contains(self, vector):
-        """Prüft, ob ein Vektor innerhalb der Hypersphäre liegt"""
+        """Check if vector lies inside hypersphere."""
         dist = np.linalg.norm(np.array(vector) - np.array(self.center))
         return dist <= self.radius
 
     def distance(self, vector):
         return float(np.linalg.norm(np.array(vector) - np.array(self.center)))
 
-    def score(self, vector, sigma_divisor=3.0):
-        """Gauß-Score für Empfehlungen"""
+    def score(self, vector):
+        """Gaussian scoring relative to pool center and radius."""
         dist = self.distance(vector)
-        sigma = self.radius / sigma_divisor
+        sigma = max(self.radius / POOL_SIGMA_DIVISOR, 0.1)
         return float(np.exp(- (dist ** 2) / (2 * sigma ** 2)))
+
+    def grow_radius_until_candidates(self, candidate_vectors):
+        """
+        Dynamically grow radius until at least N candidates are inside.
+        """
+        step = 0
+        while step < POOL_MAX_GROW_STEPS:
+            inside = [vec for vec in candidate_vectors if self.contains(vec)]
+            if len(inside) >= POOL_MIN_CANDIDATES:
+                break
+            self.radius *= POOL_GROW_FACTOR
+            step += 1
+        self.save()
+        return self.radius
 
     def check_surface_tension_and_split(self, candidate_vectors):
         """
-        Prüft Cluster außerhalb des Pools.
-        Wenn SurfaceTension überschritten wird, wird ein neuer Pool gebildet.
-        candidate_vectors: Liste von Movie-Embeddings außerhalb des Pools
+        Placeholder: detect clusters outside the pool and decide if a split is needed.
         """
-        # Placeholder: Cluster-Detection & Vergleich mit surface_tension
-        # -> Wenn Cluster groß genug -> erstelle neuen UserPool
         pass

@@ -3,7 +3,7 @@ from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 from user.services import pool_service
 from movies.models import Movie
-from user.models import UserProfile
+from user.models import UserProfile, UserPool
 
 
 @receiver(post_save, sender=User)
@@ -29,3 +29,14 @@ def favorite_movies_updated(sender, instance: UserProfile, action, reverse, pk_s
     elif action == "post_remove":
         # Optional: Pool neu berechnen oder Film entfernen
         pass
+
+@receiver(post_save, sender=UserProfile)
+def create_user_pools(sender, instance, created, **kwargs):
+    if created:
+        for dim in ["vibe", "style", "plot"]:
+            UserPool.objects.create(
+                user=instance.user,
+                dimension=dim,
+                center=[0.0] * 300,  # neutral vector
+                radius=0.7
+            )

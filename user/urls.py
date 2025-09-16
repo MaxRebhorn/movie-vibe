@@ -14,7 +14,8 @@ from .views import (  # Ensure this is a relative import
     get_csrf_token,
     check_auth,
     FavoriteMovieView,
-is_favorite_movie
+is_favorite_movie,
+Get_Movie_Recommendations
 )
 
 urlpatterns = [
@@ -30,4 +31,5 @@ urlpatterns = [
     path('favorites/', FavoriteMovieView.as_view(), name='favorite-movies'),  # Handles GET & POST
     path('favorites/check/<int:movie_id>/', is_favorite_movie, name='check-favorite-movie'),
     path('reviews/', UserReviewListView.as_view(), name='user-reviews'),
+    path('recommendations/', Get_Movie_Recommendations.as_view(), name='get-recommendations'),
 ]

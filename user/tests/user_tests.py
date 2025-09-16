@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from movies.models import Movie
 from review.models import Review
-from .models import UserProfile
+from user.models import UserProfile
 
 
 class UserViewsTestCase(APITestCase):

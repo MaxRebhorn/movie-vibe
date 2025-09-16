@@ -1,68 +1,54 @@
-// File: src/pages/LikePage/LikePage.jsx
-import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState, useEffect, useContext} from 'react';
+import {useNavigate} from 'react-router-dom';
 import Navbar from '../../components/organisms/Navbar/Navbar';
 import UserProfile from '../../components/organisms/UserProfile/UserProfile';
 import MovieGrid from "../../components/organisms/MovieGrid/MovieGrid";
 import styles from './UserPage.module.css';
-import { AuthContext } from '../../context/AuthContext';
-import { movieAPI, favoriteAPI } from '../../services/api';
+import {AuthContext} from '../../context/AuthContext';
+import {favoriteAPI, recommendationAPI} from '../../services/api';
 
 function UserPage() {
-    const { user } = useContext(AuthContext); // Get current user from context
+    const {user} = useContext(AuthContext);
     const navigate = useNavigate();
 
     const [favoriteMovies, setFavoriteMovies] = useState([]);
-    const [similarMovies, setSimilarMovies] = useState([]);
+    const [recommendedMovies, setRecommendedMovies] = useState([]);
     const [loadingFavorites, setLoadingFavorites] = useState(true);
-    const [loadingSimilar, setLoadingSimilar] = useState(true);
+    const [loadingRecommended, setLoadingRecommended] = useState(true);
     const [errorFavorites, setErrorFavorites] = useState(null);
-    const [errorSimilar, setErrorSimilar] = useState(null);
+    const [errorRecommended, setErrorRecommended] = useState(null);
 
-    // Fetch favorite movies
+    // Redirect to login if no user
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+        }
+    }, [user, navigate]);
+
+    // Fetch favorites and recommendations together
     useEffect(() => {
         if (!user) return;
 
-        const fetchFavorites = async () => {
-            try {
-                const data = await favoriteAPI.getFavorites();
-                setFavoriteMovies(data);
-            } catch (err) {
-                setErrorFavorites(err.message);
-            } finally {
-                setLoadingFavorites(false);
-            }
-        };
-
-        fetchFavorites();
-    }, [user]);
-
-    // Fetch similar/recommended movies
-    useEffect(() => {
-        if (!user) {
-            navigate('/login'); // redirect to login if no user
-            return;
-        }
-
         const fetchRecommendations = async () => {
             try {
-                const data = await movieAPI.getSimilarMovies(user.id); // or use user preferences
-                setSimilarMovies(data);
+                const data = await recommendationAPI.getRecommendations();
+                setRecommendedMovies(data);
             } catch (err) {
-                setErrorSimilar(err.message);
+                setErrorRecommended(err.message);
             } finally {
-                setLoadingSimilar(false);
+                setLoadingRecommended(false);
             }
         };
 
         fetchRecommendations();
-    }, [user, navigate]);
+    }, [user]);
 
-    if (!user) return null; // nothing to render while redirecting
+
+    if (!user) return null; // render nothing while redirecting
 
     return (
         <div className={styles.container}>
-            <Navbar />
+            <Navbar/>
             <main className={styles.main}>
                 <UserProfile
                     username={user.username}
@@ -73,23 +59,31 @@ function UserPage() {
                     movies_added={user.movies_added}
                 />
 
-                <h2>Your Favorites</h2>
-                {loadingFavorites ? (
-                    <p>Loading favorites...</p>
-                ) : errorFavorites || favoriteMovies.length === 0 ? (
-                    <p>No favorite movies yet.</p>
-                ) : (
-                    <MovieGrid movies={favoriteMovies} />
-                )}
+                <section>
+                    <h2>Your Favorites</h2>
+                    {loadingFavorites ? (
+                        <p>Loading favorites...</p>
+                    ) : errorFavorites ? (
+                        <p>Error loading favorites: {errorFavorites}</p>
+                    ) : favoriteMovies.length === 0 ? (
+                        <p>No favorite movies yet.</p>
+                    ) : (
+                        <MovieGrid movies={favoriteMovies}/>
+                    )}
+                </section>
 
-                <h2>You Might Like These Movies Based on Your Likes</h2>
-                {loadingSimilar ? (
-                    <p>Loading recommendations...</p>
-                ) : errorSimilar || similarMovies.length === 0 ? (
-                    <p>No similar movies found.</p>
-                ) : (
-                    <MovieGrid movies={similarMovies} />
-                )}
+                <section>
+                    <h2>You Might Like These Movies Based on Your Likes</h2>
+                    {loadingRecommended ? (
+                        <p>Loading recommendations...</p>
+                    ) : errorRecommended ? (
+                        <p>Error loading recommendations: {errorRecommended}</p>
+                    ) : recommendedMovies.length === 0 ? (
+                        <p>No recommendations found.</p>
+                    ) : (
+                        <MovieGrid movies={recommendedMovies}/>
+                    )}
+                </section>
             </main>
         </div>
     );
