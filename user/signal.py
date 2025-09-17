@@ -40,3 +40,18 @@ def create_user_pools(sender, instance, created, **kwargs):
                 center=[0.0] * 300,  # neutral vector
                 radius=0.7
             )
+
+@receiver(post_save, sender=UserProfile)
+def create_user_pools(sender, instance, created, **kwargs):
+    if created:
+        # Step 1: Create default pools
+        for dim in ["vibe", "style", "plot"]:
+            UserPool.objects.create(
+                user=instance.user,
+                dimension=dim,
+                center=[0.0] * 300,  # neutral vector
+                radius=0.7
+            )
+
+        # Step 2: Defer pool population - favorite movies aren't available yet
+        # This will be handled by the m2m_changed signal when favorites are added

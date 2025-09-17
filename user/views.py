@@ -141,9 +141,13 @@ class Get_Movie_Recommendations(APIView):
         recommendations = pool_service.get_recommendations(profile, top_n=20)
 
         movie_ids = [rec["movie_id"] for rec in recommendations]
+
+        # Get movies in the order of recommendations
         movies = Movie.objects.filter(id__in=movie_ids)
-        movie_dict = {movie.id: movie for movie in movies}
-        sorted_movies = [movie_dict[mid] for mid in movie_ids if mid in movie_dict]
+        # Create mapping for efficient lookup
+        movie_map = {movie.id: movie for movie in movies}
+        # Preserve the order from recommendations
+        sorted_movies = [movie_map[mid] for mid in movie_ids if mid in movie_map]
 
         serializer = MovieSerializer(sorted_movies, many=True)
         return Response(serializer.data)
