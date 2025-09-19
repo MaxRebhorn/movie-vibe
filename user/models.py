@@ -3,17 +3,15 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.contrib.auth.models import User
 from movies.models import Movie
+from user.settings.pool_settings import (
 
-# ============================
-# Hyperparameters
-# ============================
-POOL_MIN_RADIUS = 1.0
-POOL_GROW_FACTOR = 1.2
-POOL_MAX_GROW_STEPS = 10
-POOL_MIN_CANDIDATES = 3
-POOL_SIGMA_DIVISOR = 3.0
-POOL_SURFACE_TENSION = 0.1
-POOL_MAX_MOVIE_DUPLICATES = 2  # Max pools per movie
+    POOL_MIN_RADIUS,
+    POOL_SURFACE_TENSION,
+    POOL_SIGMA_DIVISOR,
+    POOL_VECTOR_SIZE
+
+)  # Embedding vector size
+
 
 # ============================
 # User Profile
@@ -64,8 +62,8 @@ class UserPool(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pools")
     dimension = models.CharField(max_length=20, choices=DIMENSION_CHOICES)
     name = models.CharField(max_length=100, blank=True, default="")
-    pos_weight_sum = models.FloatField(default=0.0)
-    center = ArrayField(models.FloatField(), size=300)
+    pos_weight_sum = models.FloatField(default=0.0)  # Sum of weights for favorites
+    center = ArrayField(models.FloatField(), size=POOL_VECTOR_SIZE)
     radius = models.FloatField(default=POOL_MIN_RADIUS)
     surface_tension = models.FloatField(default=POOL_SURFACE_TENSION)
 
@@ -86,18 +84,29 @@ class UserPool(models.Model):
 
     # ---------------- Core Methods ----------------
     def update_center(self):
-        if self.support_movie_ids:
-            vecs = np.array(self.pos_weighted_sum) if hasattr(self, "pos_weighted_sum") else np.zeros(300)
+        """Update center based on weighted favorite vectors."""
+        if hasattr(self, "pos_weighted_sum") and self.support_movie_ids:
+            vecs = np.array(self.pos_weighted_sum)
             self.center = (vecs / max(self.pos_weight_sum, 1)).tolist()
             self.save()
 
     def contains(self, vector):
+        """Check if a vector lies within this pool's radius."""
         return np.linalg.norm(np.array(vector) - np.array(self.center)) <= self.radius
 
     def distance(self, vector):
+        """Euclidean distance from the pool center."""
         return float(np.linalg.norm(np.array(vector) - np.array(self.center)))
 
     def score(self, vector):
+        """Gaussian score for a vector relative to pool center."""
         dist = self.distance(vector)
         sigma = max(self.radius / POOL_SIGMA_DIVISOR, 0.1)
         return float(np.exp(- (dist ** 2) / (2 * sigma ** 2)))
+
+    def update_support_movies(self):
+        """Ensure only favorite movies are tracked in the pool."""
+        profile = self.user.profile
+        favorite_ids = set(profile.favorite_movies.values_list("id", flat=True))
+        self.support_movie_ids = [mid for mid in self.support_movie_ids if mid in favorite_ids]
+        self.save()

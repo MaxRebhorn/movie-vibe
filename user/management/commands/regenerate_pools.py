@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from user.models import UserProfile, UserPool
-from user.services.pool_service import get_user_pools, recompute_user_pools
+from user.services.pool_service import recompute_user_pools
+from user.settings.pool_settings import POOL_MIN_RADIUS
 
 class Command(BaseCommand):
     help = "Regenerate all UserPools for all users and populate with favorite movies"
@@ -15,12 +16,9 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(self.style.NOTICE(f"Created missing profile for user: {user.username}"))
 
-            # Recreate pools
-            get_user_pools(profile)
-
-            # Recompute all pools at once (faster, compatible with new API)
+            # Recompute all pools at once using the new service
             recompute_user_pools(profile)
 
-            self.stdout.write(self.style.SUCCESS(f"Regenerated pools for user: {user.username}"))
+            self.stdout.write(self.style.SUCCESS(f"✅ Regenerated pools for user: {user.username}"))
 
-        self.stdout.write(self.style.SUCCESS("✅ All user pools have been regenerated."))
+        self.stdout.write(self.style.SUCCESS("🎯 All user pools have been regenerated."))
