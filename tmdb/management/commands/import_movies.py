@@ -12,6 +12,11 @@ from tmdb.services.api_service import (
 )
 from movies.models import Movie
 
+
+#Example command python main.py import_movies
+
+
+
 class Command(BaseCommand):
     help = "Imports a list of movies from a JSON file and adds them via the TMDb API"
 

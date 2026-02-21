@@ -14,14 +14,17 @@ qdrant-client==1.7.0
 elasticsearch<8
 django-elasticsearch-dsl<8
 bandit==1.7.7
-torch==2.3.0
+torch==2.2.0
 torchvision==0.17.0
 transformers==4.42.0
-
-
 
 # New analysis tools
 flake8==7.0.0
 mypy==1.10.0
 django-stubs==4.2.7
 
+# Neue Pakete für die fehlenden Features (korrigiert)
+drf-yasg==1.21.7              # Swagger/OpenAPI
+djangorestframework-simplejwt==5.3.1  # JWT Authentication
+django-extensions==3.2.3      # Für UML Diagramme
+# pygraphviz wird optional installiert, falls systemweit verfügbar

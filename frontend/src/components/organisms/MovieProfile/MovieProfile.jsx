@@ -32,13 +32,13 @@ function MovieProfile({
 
     useEffect(() => {
         const fetchFavoriteStatus = async () => {
-            console.log('Fetching favorite status for movie ID:', id);
+            console.log('Fetching favorite AIContext.txt for movie ID:', id);
             try {
                 const data = await favoriteAPI.checkFavorite(id);
-                console.log('Favorite status fetched:', data);
+                console.log('Favorite AIContext.txt fetched:', data);
                 setIsFavorite(data.is_favorite);
             } catch (err) {
-                console.error('Failed to fetch favorite status:', err.message);
+                console.error('Failed to fetch favorite AIContext.txt:', err.message);
             } finally {
                 setLoading(false);
             }

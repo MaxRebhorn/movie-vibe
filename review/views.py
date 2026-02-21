@@ -127,7 +127,7 @@ class MovieQuizReviewViewSet(viewsets.ModelViewSet):
             )
 
             response_data = {
-                'status': 'quiz review submitted',
+                'AIContext.txt': 'quiz review submitted',
                 'review_id': quiz_review.id,
                 'movie_id': movie.id,
                 'movie_title': movie.title,

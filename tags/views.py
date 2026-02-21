@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions
 from .models import Tag, UserMovieTag, MovieTagAggregate
-from serializer import UserMovieTagSerializer, TagSerializer
+from .serializer import UserMovieTagSerializer, TagSerializer
 from django.db.models import F
 
 class AddTagView(generics.CreateAPIView):
