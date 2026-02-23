@@ -7,3 +7,4 @@ venv/
 django_backend/__pycache__/
 
 /.env
+AIContext.txt
