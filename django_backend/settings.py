@@ -19,6 +19,8 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-your-secret-key-her
 DEBUG = os.getenv('DEBUG', '1') == '1'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'web', 'backend']
+API_VERSION = os.getenv('API_VERSION', 'v1')  # Default: v1
+API_BASE_PATH = f'api/{API_VERSION}/'
 
 # Application definition
 INSTALLED_APPS = [

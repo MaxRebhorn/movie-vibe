@@ -17,7 +17,7 @@ from rest_framework_simplejwt.views import (
 schema_view = get_schema_view(
     openapi.Info(
         title="MoVi SOL API",
-        default_version='v1',
+        default_version=settings.API_VERSION,  # Dynamisch aus settings!
         description="Movie Vibe - Semantic Movie Search API",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="contact@movievibe.local"),
@@ -27,8 +27,8 @@ schema_view = get_schema_view(
     permission_classes=[permissions.AllowAny],
 )
 
-# API v1 URLs
-api_v1_patterns = [
+# API Patterns (zentral definiert)
+api_patterns = [
     path('movies/', include('movies.urls')),
     path('reviews/', include('review.urls')),
     path('tags/', include('tags.urls')),
@@ -42,12 +42,12 @@ api_v1_patterns = [
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
-    
-    # API v1
-    path('api/v1/', include(api_v1_patterns)),
-    
-    # API v2 (für zukünftige Erweiterungen)
-    # path('api/v2/', include('api_v2_urls')),
+
+    # Dynamische API-Version aus settings
+    path(f'api/{settings.API_VERSION}/', include(api_patterns)),
+
+    # Für Kompatibilität: Immer auch die aktuelle Version unter /api/ verfügbar
+    path('api/', include(api_patterns)),
     
     # Swagger/OpenAPI Documentation
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
