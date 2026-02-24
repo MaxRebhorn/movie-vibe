@@ -255,3 +255,11 @@ QDRANT_COLLECTIONS = {
     "movies_style": os.getenv("QDRANT_COLLECTION_STYLE", "movies_style"),
     "movies_combined": os.getenv("QDRANT_COLLECTION_COMBINED", "movies_combined"),
 }
+
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

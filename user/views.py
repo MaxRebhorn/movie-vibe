@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login
 from rest_framework import generics, permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -28,17 +29,42 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
+class LoginRateThrottle(AnonRateThrottle):
+    scope = 'login'
+    rate = '5/hour'
+
+
 # === Login ===
 class LoginView(APIView):
+    """
+    Login endpoint with rate limiting: 5 attempts per hour
+    """
+    throttle_classes = [LoginRateThrottle]  # Add throttling here
+    permission_classes = [AllowAny]  # Allow unauthenticated access
+
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
+
+        # Validate input
+        if not username or not password:
+            return Response(
+                {"detail": "Username and password required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return Response({"detail": "Logged in successfully"})
-        return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-
+            return Response({
+                "detail": "Logged in successfully",
+                "username": user.username,
+                "email": user.email
+            })
+        return Response(
+            {"detail": "Invalid credentials"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 # === Profile Page ===
 class ProfileView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
